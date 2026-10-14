@@ -548,12 +548,7 @@ export default function Home() {
             style={{
               perspective: "800px",
               transformStyle: "preserve-3d",
-              transition: isLogoHovered 
-                ? "filter 0.3s ease" 
-                : "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s ease",
-              filter: isLogoHovered
-                ? "drop-shadow(0 0 28px rgba(251,191,36,0.85)) brightness(1.1)"
-                : "drop-shadow(0 8px 18px rgba(0,0,0,0.75))",
+              filter: "drop-shadow(0 8px 18px rgba(0,0,0,0.75))",
             }}
             title="Genesis Emblem • Click for Victory Powerup!"
           >
@@ -569,51 +564,14 @@ export default function Home() {
               priority
             />
 
-            {/* Dynamic Light Sweep Glint on Hover */}
-            {isLogoHovered && (
-              <div 
-                className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl"
-                style={{
-                  background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)",
-                  animation: "shimmer-sweep 1.8s infinite ease-in-out",
-                }}
-              />
-            )}
-
-            {/* Wing Energy Particles */}
+            {/* Subtle Center Star Glint */}
             <div 
-              className={`absolute top-[28%] left-[49%] w-3.5 h-3.5 bg-white rounded-full pointer-events-none transition-all ${
-                isLogoHovered ? "scale-150" : ""
-              }`}
+              className="absolute top-[28%] left-[49%] w-3 h-3 bg-white rounded-full pointer-events-none"
               style={{
-                boxShadow: isLogoHovered 
-                  ? "0 0 14px 5px #fde047, 0 0 28px 10px #f59e0b"
-                  : "0 0 8px 3px #fbbf24, 0 0 16px 6px #f59e0b",
+                boxShadow: "0 0 8px 3px #fbbf24, 0 0 16px 6px #f59e0b",
                 animation: "glint 2.5s infinite ease-in-out",
               }}
             />
-
-            {/* Left Wing Sparkle */}
-            {isLogoHovered && (
-              <div 
-                className="absolute top-[65%] left-[18%] w-2.5 h-2.5 bg-yellow-200 rounded-full pointer-events-none"
-                style={{
-                  boxShadow: "0 0 10px 3px #facc15",
-                  animation: "glint 1.8s 0.2s infinite ease-in-out",
-                }}
-              />
-            )}
-
-            {/* Right Wing Sparkle */}
-            {isLogoHovered && (
-              <div 
-                className="absolute top-[65%] right-[18%] w-2.5 h-2.5 bg-yellow-200 rounded-full pointer-events-none"
-                style={{
-                  boxShadow: "0 0 10px 3px #facc15",
-                  animation: "glint 1.8s 0.6s infinite ease-in-out",
-                }}
-              />
-            )}
           </div>
         </div>
 

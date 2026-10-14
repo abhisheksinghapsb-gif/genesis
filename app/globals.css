@@ -211,15 +211,6 @@ body {
   }
 }
 
-@keyframes shimmer-sweep {
-  0% {
-    transform: translate3d(-150%, 0, 0) skewX(-20deg);
-  }
-  100% {
-    transform: translate3d(250%, 0, 0) skewX(-20deg);
-  }
-}
-
 @keyframes glint {
   0%, 100% {
     opacity: 0;
