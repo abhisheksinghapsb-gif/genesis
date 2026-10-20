@@ -427,17 +427,17 @@ export default function Home() {
 
         {/* ── TOP NAVIGATION BAR ─────────────────────────────── */}
         <header className="absolute top-0 left-0 right-0 z-30 flex items-start justify-between px-6 pt-2 pointer-events-none">
-          {/* Top-Left: GDAI Club Banner (Semantic external link to IndieConnect in current tab) */}
+          {/* Top-Left: GDAI Club Banner (External link to IndieConnect in new tab) */}
           <a
             href="https://www.indieconnect.in/"
-            target="_self"
+            target="_blank"
             rel="noopener noreferrer"
             className="pointer-events-auto group transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg block cursor-pointer"
             style={{
               animation: "banner-sway 4s ease-in-out infinite",
               marginLeft: "var(--gdai-left-offset, 20px)",
             }}
-            aria-label="Visit IndieConnect (GDAI Club)"
+            aria-label="Visit IndieConnect (GDAI Club) - Opens in new tab"
           >
             <div className="relative">
               <Image
