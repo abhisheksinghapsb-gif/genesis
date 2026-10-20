@@ -641,6 +641,147 @@ body {
   animation: arena-card-shake 0.6s ease-in-out infinite;
 }
 
+/* ── SHADOW SPIKE POPPING OUT ANIMATION ── */
+@keyframes spike-pop {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-3px, -14px, 0) scale(1.05);
+  }
+}
+
+.animate-spike-pop {
+  animation: spike-pop 3.5s ease-in-out infinite;
+}
+
+/* ── SPONSORS SECTION: ICON POP-OUT ANIMATIONS (NOT ON TEXT) ── */
+@keyframes icon-pop-crown {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  30% {
+    transform: translate3d(0, -6px, 0) scale(1.1) rotate(-3.5deg);
+  }
+  60% {
+    transform: translate3d(0, -2px, 0) scale(1.03) rotate(-1deg);
+  }
+}
+
+@keyframes icon-pop-gems {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  30% {
+    transform: translate3d(0, -6px, 0) scale(1.1) rotate(3.5deg);
+  }
+  60% {
+    transform: translate3d(0, -2px, 0) scale(1.03) rotate(1deg);
+  }
+}
+
+.animate-icon-pop-crown {
+  animation: icon-pop-crown 3.2s ease-in-out infinite;
+}
+
+.animate-icon-pop-gems {
+  animation: icon-pop-gems 3.2s 0.8s ease-in-out infinite;
+}
+
+/* ── TIMELINE STAGE CLICK SELECTION PULSE (380ms finite pulse) ── */
+@keyframes stage-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(253, 217, 68, 0.9), inset 0 0 16px rgba(253, 217, 68, 0.4);
+    transform: scale(1.025);
+  }
+  50% {
+    box-shadow: 0 0 24px 6px rgba(253, 217, 68, 0.7), inset 0 0 24px rgba(253, 217, 68, 0.5);
+    transform: scale(1.035);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(253, 217, 68, 0), inset 0 0 0 rgba(253, 217, 68, 0);
+    transform: scale(1);
+  }
+}
+
+.animate-stage-pulse {
+  animation: stage-pulse 380ms ease-out forwards;
+}
+
+/* ── PAST SPONSORS LOGO CARDS ENHANCED PERMANENT GLOW & RESTRAINED HOVER ── */
+.sponsor-glow-gamecloud {
+  filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.75)) drop-shadow(0 0 28px rgba(14, 165, 233, 0.45)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+  transition: transform 240ms cubic-bezier(0.25, 1, 0.5, 1), filter 240ms cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+}
+
+.sponsor-glow-gamecloud:hover {
+  transform: translateY(-3.5px) scale(1.025);
+  filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 42px rgba(14, 165, 233, 0.65)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.8));
+}
+
+.sponsor-glow-gamedoora {
+  filter: drop-shadow(0 0 14px rgba(249, 115, 22, 0.75)) drop-shadow(0 0 28px rgba(234, 88, 12, 0.45)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+  transition: transform 240ms cubic-bezier(0.25, 1, 0.5, 1), filter 240ms cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+}
+
+.sponsor-glow-gamedoora:hover {
+  transform: translateY(-3.5px) scale(1.025);
+  filter: drop-shadow(0 0 22px rgba(249, 115, 22, 0.95)) drop-shadow(0 0 42px rgba(234, 88, 12, 0.65)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.8));
+}
+
+/* ── FAQ ARCADE PANEL & QUESTION ROWS REFERENCE GEOMETRY ── */
+.faq-panel-body {
+  padding: 22px 45px;
+}
+
+.faq-question-btn {
+  padding-left: 28px;
+  padding-right: 28px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.faq-answer-content {
+  padding-left: 28px;
+  padding-right: 28px;
+  padding-top: 10px;
+  padding-bottom: 18px;
+}
+
+@media (max-width: 1024px) {
+  .faq-panel-body {
+    padding: 18px 32px;
+  }
+  .faq-question-btn {
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .faq-answer-content {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .faq-panel-body {
+    padding: 12px 16px;
+  }
+  .faq-question-btn {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .faq-answer-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 /* ── NATIVE HORIZONTAL TIMELINE VIEWPORT ── */
 .timeline-viewport::-webkit-scrollbar {
   display: none;
@@ -648,6 +789,117 @@ body {
 .timeline-viewport {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── PRIZE POOL SECTION: INTERACTIVE HOVER & MOBILE GALLERY ── */
+@keyframes prize-badge-wobble {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  20% {
+    transform: translateY(-6px) scale(1.038) rotate(-1.8deg);
+  }
+  45% {
+    transform: translateY(-5px) scale(1.035) rotate(1.5deg);
+  }
+  70% {
+    transform: translateY(-5px) scale(1.032) rotate(-0.8deg);
+  }
+  100% {
+    transform: translateY(-5px) scale(1.03) rotate(0deg);
+  }
+}
+
+.prize-badge-hover {
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: center center;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .prize-badge-hover:hover {
+    animation: prize-badge-wobble 0.32s ease-out forwards;
+  }
+}
+
+@keyframes woody-wobble {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-6px) scale(1.03) rotate(-1.8deg);
+  }
+  55% {
+    transform: translateY(-5px) scale(1.028) rotate(1.2deg);
+  }
+  80% {
+    transform: translateY(-5px) scale(1.025) rotate(-0.5deg);
+  }
+  100% {
+    transform: translateY(-5px) scale(1.025) rotate(0deg);
+  }
+}
+
+.woody-hover {
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: bottom center;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .woody-hover:hover {
+    animation: woody-wobble 0.32s ease-out forwards;
+  }
+}
+
+@keyframes buzz-wobble {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-6px) scale(1.03) rotate(1.8deg);
+  }
+  55% {
+    transform: translateY(-5px) scale(1.028) rotate(-1.2deg);
+  }
+  80% {
+    transform: translateY(-5px) scale(1.025) rotate(0.5deg);
+  }
+  100% {
+    transform: translateY(-5px) scale(1.025) rotate(0deg);
+  }
+}
+
+.buzz-hover {
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: bottom center;
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .buzz-hover:hover {
+    animation: buzz-wobble 0.32s ease-out forwards;
+  }
+}
+
+/* Mobile swipeable galleries */
+.prize-mobile-gallery {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.prize-mobile-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.prize-mobile-badge-item {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
 }
 
 @media (prefers-reduced-motion: reduce) {

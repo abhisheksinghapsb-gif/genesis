@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prize Pool Responsive Test</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #04021d;
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+.prize-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #030015;
+}
+
+/* Background layers */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* ── DESKTOP SCALED STAGE (md: >= 768px) ── */
+.desktop-stage-wrap {
+  display: none;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .desktop-stage-wrap {
+    display: flex;
+  }
+  .mobile-stage-wrap {
+    display: none !important;
+  }
+}
+
+.desktop-canvas {
+  position: relative;
+  width: 1440px;
+  height: 1024px;
+  flex-shrink: 0;
+  transform-origin: center center;
+}
+
+/* Main Heading */
+.main-title-wrap {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 527px;
+  height: 116px;
+  z-index: 30;
+}
+.main-title-wrap img { width: 100%; height: 100%; }
+
+/* Arenas */
+.arena-container { position: absolute; z-index: 20; }
+.arena-upper { left: 67px; top: 187px; width: 1315px; height: 361px; }
+.arena-lower { left: 95px; top: 598px; width: 1251px; height: 397px; }
+
+.arena-frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.arena-title { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); z-index: 15; pointer-events: none; }
+
+/* Characters */
+.char-woody {
+  position: absolute;
+  left: 15px;
+  top: -107px;
+  width: 487px;
+  height: 436px;
+  z-index: 12;
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: bottom center;
+}
+.char-woody:hover {
+  transform: translateY(-6px) scale(1.03) rotate(-1.5deg);
+}
+
+.char-buzz {
+  position: absolute;
+  right: 15px;
+  top: -115px;
+  width: 624px;
+  height: 535px;
+  z-index: 12;
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: bottom center;
+}
+.char-buzz:hover {
+  transform: translateY(-6px) scale(1.03) rotate(1.5deg);
+}
+
+/* Badges */
+.badge-interactive {
+  position: absolute;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.badge-interactive:hover {
+  transform: translateY(-6px) scale(1.038);
+}
+
+.badge-main-1 { left: 540px; top: 36px; width: 246px; height: 316px; }
+.badge-main-2 { left: 782px; top: 45px; width: 246px; height: 304px; }
+.badge-main-3 { left: 1023px; top: 40px; width: 247px; height: 306px; }
+
+.badge-vr-1 { left: 95px; top: 34px; width: 276px; height: 352px; }
+.badge-vr-2 { left: 417px; top: 38px; width: 276px; height: 340px; }
+
+.gem-decor {
+  position: absolute;
+  left: 55px;
+  top: 530px;
+  width: 145px;
+  height: 155px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+/* ── MOBILE STACK ( < 768px ) ── */
+.mobile-stage-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 16px 12px 32px;
+  gap: 20px;
+  z-index: 20;
+}
+
+.mobile-title-wrap {
+  width: 88%;
+  max-width: 380px;
+  margin: 0 auto 6px;
+}
+.mobile-title-wrap img { width: 100%; height: auto; }
+
+.mobile-arena {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(14, 88, 246, 0.95) 0%, rgba(9, 44, 130, 0.98) 100%);
+  border-radius: 20px;
+  border: 3px solid #20CEFF;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  padding: 14px 0 16px;
+}
+
+.mobile-arena-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 10px;
+  border-bottom: 2px solid rgba(32, 206, 255, 0.35);
+}
+
+.mobile-arena-title {
+  height: 44px;
+  width: auto;
+}
+
+.mobile-arena-char {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  margin-top: -12px;
+}
+
+.mobile-gallery {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 14px;
+  padding: 16px 20px 8px;
+}
+.mobile-gallery::-webkit-scrollbar { display: none; }
+
+.mobile-badge-card {
+  flex: 0 0 190px;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mobile-badge-card img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.6));
+}
+
+.mobile-gem {
+  width: 75px;
+  height: auto;
+  margin: -10px auto;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+}
+</style>
+<script>
+function updateScale() {
+  const canvas = document.querySelector('.desktop-canvas');
+  if (!canvas) return;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  if (vw < 768) return;
+  
+  // Calculate scale to comfortably fit both width and height
+  const scaleW = (vw * 0.96) / 1440;
+  const scaleH = (vh * 0.95) / 1024;
+  const scale = Math.min(scaleW, scaleH, 1.15);
+  canvas.style.transform = `scale(${scale.toFixed(4)})`;
+}
+window.addEventListener('resize', updateScale);
+window.addEventListener('DOMContentLoaded', updateScale);
+</script>
+</head>
+<body>
+
+<section class="prize-section" id="prizepool">
+  <!-- Cosmic Backgrounds -->
+  <img class="bg-layer" src="bg_cosmic_pattern.svg" alt="">
+  <img class="bg-layer" src="bg_blue_icons.svg" alt="" style="opacity: 0.85; mix-blend-mode: screen;">
+
+  <!-- DESKTOP STAGE -->
+  <div class="desktop-stage-wrap">
+    <div class="desktop-canvas">
+      <!-- Main Title -->
+      <div class="main-title-wrap">
+        <img src="title_prizepool.svg" alt="PRIZE POOL">
+      </div>
+
+      <!-- Upper Arena: Prizes -->
+      <div class="arena-container arena-upper">
+        <img class="arena-frame" src="arena_upper_frame.svg" alt="">
+        <img class="arena-title" src="title_prizes.svg" alt="PRIZES" style="width: 274px; height: 73px;">
+        
+        <img class="char-woody" src="woody.svg" alt="Woody">
+        
+        <img class="badge-interactive badge-main-1" src="badge_main_1st.svg" alt="1st Prize ₹17,500">
+        <img class="badge-interactive badge-main-2" src="badge_main_2nd.svg" alt="2nd Prize ₹15,000">
+        <img class="badge-interactive badge-main-3" src="badge_main_3rd.svg" alt="3rd Prize ₹12,500">
+      </div>
+
+      <!-- Decorative Gem -->
+      <img class="gem-decor" src="gem_purple.svg" alt="">
+
+      <!-- Lower Arena: VR Track -->
+      <div class="arena-container arena-lower">
+        <img class="arena-frame" src="arena_lower_frame.svg" alt="">
+        <img class="arena-title" src="title_vr_track.svg" alt="VR TRACK" style="width: 363px; height: 70px;">
+        
+        <img class="badge-interactive badge-vr-1" src="badge_vr_1st.svg" alt="1st Prize ₹10,000">
+        <img class="badge-interactive badge-vr-2" src="badge_vr_2nd.svg" alt="2nd Prize ₹5,000">
+        
+        <img class="char-buzz" src="buzzlight.svg" alt="Buzz Lightyear">
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE STAGE -->
+  <div class="mobile-stage-wrap">
+    <!-- Main Title -->
+    <div class="mobile-title-wrap">
+      <img src="title_prizepool.svg" alt="PRIZE POOL">
+    </div>
+
+    <!-- Arena 1: Main Tournament -->
+    <div class="mobile-arena">
+      <div class="mobile-arena-header">
+        <img class="mobile-arena-title" src="title_prizes.svg" alt="PRIZES">
+        <img class="mobile-arena-char" src="woody.svg" alt="Woody">
+      </div>
+      <div class="mobile-gallery">
+        <div class="mobile-badge-card">
+          <img src="badge_main_1st.svg" alt="1st Prize ₹17,500">
+        </div>
+        <div class="mobile-badge-card">
+          <img src="badge_main_2nd.svg" alt="2nd Prize ₹15,000">
+        </div>
+        <div class="mobile-badge-card">
+          <img src="badge_main_3rd.svg" alt="3rd Prize ₹12,500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Gem in between -->
+    <img class="mobile-gem" src="gem_purple.svg" alt="">
+
+    <!-- Arena 2: VR Track -->
+    <div class="mobile-arena">
+      <div class="mobile-arena-header">
+        <img class="mobile-arena-title" src="title_vr_track.svg" alt="VR TRACK">
+        <img class="mobile-arena-char" src="buzzlight.svg" alt="Buzz Lightyear">
+      </div>
+      <div class="mobile-gallery">
+        <div class="mobile-badge-card">
+          <img src="badge_vr_1st.svg" alt="1st Prize ₹10,000">
+        </div>
+        <div class="mobile-badge-card">
+          <img src="badge_vr_2nd.svg" alt="2nd Prize ₹5,000">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

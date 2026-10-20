@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  width: 1440px;
+  height: 1024px;
+  overflow: hidden;
+  position: relative;
+  background: #04021d;
+  font-family: sans-serif;
+  user-select: none;
+}
+
+/* Background Layers */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 1440px;
+  height: 1024px;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Main Heading */
+.main-title-wrap {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 527px;
+  height: 116px;
+  z-index: 30;
+}
+.main-title-wrap img {
+  width: 100%;
+  height: 100%;
+}
+
+/* Arena Containers */
+.arena-container {
+  position: absolute;
+  z-index: 20;
+}
+
+/* Upper Arena */
+.arena-upper {
+  left: 67px;
+  top: 187px;
+  width: 1315px;
+  height: 361px;
+}
+
+/* Lower Arena */
+.arena-lower {
+  left: 95px;
+  top: 598px;
+  width: 1251px;
+  height: 397px;
+}
+
+.arena-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.arena-title {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  pointer-events: none;
+}
+
+/* Characters */
+.char-woody {
+  position: absolute;
+  left: 15px;
+  top: -107px;
+  width: 487px;
+  height: 436px;
+  z-index: 12;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: bottom center;
+}
+.char-woody:hover {
+  transform: translateY(-6px) scale(1.03) rotate(-1.5deg);
+}
+
+.char-buzz {
+  position: absolute;
+  right: 15px;
+  top: -115px;
+  width: 624px;
+  height: 535px;
+  z-index: 12;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: bottom center;
+}
+.char-buzz:hover {
+  transform: translateY(-6px) scale(1.03) rotate(1.5deg);
+}
+
+/* Badges */
+.badge-interactive {
+  position: absolute;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.badge-interactive:hover {
+  transform: translateY(-6px) scale(1.04);
+}
+
+/* Main Tournament Badges */
+.badge-main-1 {
+  left: 540px;
+  top: 36px;
+  width: 246px;
+  height: 316px;
+}
+.badge-main-2 {
+  left: 782px;
+  top: 45px;
+  width: 246px;
+  height: 304px;
+}
+.badge-main-3 {
+  left: 1023px;
+  top: 40px;
+  width: 247px;
+  height: 306px;
+}
+
+/* VR Track Badges */
+.badge-vr-1 {
+  left: 95px;
+  top: 34px;
+  width: 276px;
+  height: 352px;
+}
+.badge-vr-2 {
+  left: 417px;
+  top: 38px;
+  width: 276px;
+  height: 340px;
+}
+
+/* Purple Gem */
+.gem-decor {
+  position: absolute;
+  left: 55px;
+  top: 530px;
+  width: 145px;
+  height: 155px;
+  z-index: 25;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<img class="bg-layer" src="bg_cosmic_pattern.svg">
+<img class="bg-layer" src="bg_blue_icons.svg" style="opacity: 0.85; mix-blend-mode: screen;">
+
+<!-- Main Heading -->
+<div class="main-title-wrap">
+  <img src="title_prizepool.svg" alt="PRIZE POOL">
+</div>
+
+<!-- Upper Arena: Main Tournament -->
+<div class="arena-container arena-upper">
+  <img class="arena-frame" src="arena_upper_frame.svg" alt="">
+  <img class="arena-title" src="title_prizes.svg" alt="PRIZES" style="width: 274px; height: 73px;">
+  
+  <!-- Woody -->
+  <img class="char-woody" src="woody.svg" alt="Woody">
+  
+  <!-- 3 Badges -->
+  <img class="badge-interactive badge-main-1" src="badge_main_1st.svg" alt="1st Prize ₹17,500">
+  <img class="badge-interactive badge-main-2" src="badge_main_2nd.svg" alt="2nd Prize ₹15,000">
+  <img class="badge-interactive badge-main-3" src="badge_main_3rd.svg" alt="3rd Prize ₹12,500">
+</div>
+
+<!-- Decorative Purple Gem -->
+<img class="gem-decor" src="gem_purple.svg" alt="">
+
+<!-- Lower Arena: VR Track -->
+<div class="arena-container arena-lower">
+  <img class="arena-frame" src="arena_lower_frame.svg" alt="">
+  <img class="arena-title" src="title_vr_track.svg" alt="VR TRACK" style="width: 363px; height: 70px;">
+  
+  <!-- 2 Badges -->
+  <img class="badge-interactive badge-vr-1" src="badge_vr_1st.svg" alt="1st Prize ₹10,000">
+  <img class="badge-interactive badge-vr-2" src="badge_vr_2nd.svg" alt="2nd Prize ₹5,000">
+  
+  <!-- Buzz Lightyear -->
+  <img class="char-buzz" src="buzzlight.svg" alt="Buzz Lightyear">
+</div>
+
+</body>
+</html>

@@ -5,6 +5,9 @@ import Image from "next/image";
 import { sounds } from "./components/sound";
 import AboutSection from "./components/AboutSection";
 import TimelineSection from "./components/TimelineSection";
+import PrizePoolSection from "./components/PrizePoolSection";
+import SponsorsSection from "./components/SponsorsSection";
+import FAQSection from "./components/FAQSection";
 
 // Deterministic twinkling stars with individual drift offsets
 const STARS = Array.from({ length: 90 }, (_, i) => ({
@@ -22,12 +25,18 @@ export default function Home() {
   // Sound mute state (Controls arcade SFX without opening any overlay)
   const [isMuted, setIsMuted] = useState(false);
 
+  // Character interactive animation states
+  const [coltRecoil, setColtRecoil] = useState(false);
+  const [leonActive, setLeonActive] = useState(false);
+  const [telescopeGlint, setTelescopeGlint] = useState(false);
+  const [balloonBounced, setBalloonBounced] = useState(false);
+
   // 3D Interactive Tilt & Container Refs (Zero React Re-render on Mouse Move!)
   const containerRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
-  const [activeSection, setActiveSection] = useState<"hero" | "about" | "timeline">("hero");
-  const lastSectionRef = useRef<"hero" | "about" | "timeline">("hero");
+  const [activeSection, setActiveSection] = useState<"hero" | "about" | "timeline" | "prizepool" | "sponsors" | "faq">("hero");
+  const lastSectionRef = useRef<"hero" | "about" | "timeline" | "prizepool" | "sponsors" | "faq">("hero");
 
   useEffect(() => {
     let rafId: number;
@@ -60,12 +69,24 @@ export default function Home() {
       const height = window.innerHeight;
       const aboutEl = document.getElementById("about");
       const timelineEl = document.getElementById("timeline");
+      const prizepoolEl = document.getElementById("prizepool");
+      const sponsorsEl = document.getElementById("sponsors");
+      const faqEl = document.getElementById("faq");
 
       const aboutTop = aboutEl?.offsetTop || height;
       const timelineTop = timelineEl?.offsetTop || height * 2;
+      const prizepoolTop = prizepoolEl?.offsetTop || height * 3;
+      const sponsorsTop = sponsorsEl?.offsetTop || height * 4;
+      const faqTop = faqEl?.offsetTop || height * 5;
 
-      let current: "hero" | "about" | "timeline" = "hero";
-      if (scrollY >= timelineTop - height * 0.35) {
+      let current: "hero" | "about" | "timeline" | "prizepool" | "sponsors" | "faq" = "hero";
+      if (scrollY >= faqTop - height * 0.35) {
+        current = "faq";
+      } else if (scrollY >= sponsorsTop - height * 0.35) {
+        current = "sponsors";
+      } else if (scrollY >= prizepoolTop - height * 0.35) {
+        current = "prizepool";
+      } else if (scrollY >= timelineTop - height * 0.35) {
         current = "timeline";
       } else if (scrollY >= aboutTop - height * 0.35) {
         current = "about";
@@ -85,9 +106,21 @@ export default function Home() {
           document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
         } else if (lastSectionRef.current === "about") {
           document.getElementById("timeline")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "timeline") {
+          document.getElementById("prizepool")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "prizepool") {
+          document.getElementById("sponsors")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "sponsors") {
+          document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
         }
       } else if (e.key === "ArrowUp" || e.key === "PageUp") {
-        if (lastSectionRef.current === "timeline") {
+        if (lastSectionRef.current === "faq") {
+          document.getElementById("sponsors")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "sponsors") {
+          document.getElementById("prizepool")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "prizepool") {
+          document.getElementById("timeline")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "timeline") {
           document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
         } else if (lastSectionRef.current === "about") {
           document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
@@ -139,12 +172,39 @@ export default function Home() {
     sounds.setMuted(next);
   };
 
+  const handleRegisterClick = () => {
+    sounds.playRegister();
+    document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+  };
 
+  const handleColtClick = () => {
+    sounds.playLaser();
+    setColtRecoil(true);
+    setTimeout(() => setColtRecoil(false), 260);
+  };
+
+  const handleLeonClick = () => {
+    sounds.playShuriken();
+    setLeonActive(true);
+    setTimeout(() => setLeonActive(false), 380);
+  };
+
+  const handleTelescopeClick = () => {
+    sounds.playClick();
+    setTelescopeGlint(true);
+    setTimeout(() => setTelescopeGlint(false), 320);
+  };
+
+  const handleBalloonClick = () => {
+    sounds.playPop();
+    setBalloonBounced(true);
+    setTimeout(() => setBalloonBounced(false), 240);
+  };
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-screen h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth select-none bg-[#030015]"
+      className="relative w-screen h-screen overflow-y-auto overflow-x-hidden select-none bg-[#030015]"
       style={{
         ["--mx" as string]: 0,
         ["--my" as string]: 0,
@@ -153,7 +213,7 @@ export default function Home() {
       {/* ── SECTION 1: HERO VIEWPORT (FULL SCREEN 100VH) ───── */}
       <section 
         id="hero"
-        className="relative w-screen h-screen min-h-screen snap-start snap-always flex items-center justify-center overflow-hidden flex-shrink-0"
+        className="relative w-screen h-screen min-h-screen flex items-center justify-center overflow-hidden flex-shrink-0"
       >
         {/* ── Scaled Widescreen Canvas Container ──────────────── */}
         <div 
@@ -522,7 +582,7 @@ export default function Home() {
               {!isMuted ? "🔊" : "🔇"}
             </button>
 
-            {/* Menu Hamburger Button (Preserved Visuals & Placement, No Drawer Overlay) */}
+            {/* Menu Hamburger Button */}
             <button
               type="button"
               className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none cursor-default"
@@ -584,7 +644,7 @@ export default function Home() {
         {/* ── CENTER STAGE: GLOWING MOON DOME ────────────────── */}
         <div 
           className="absolute left-1/2 -translate-x-1/2 z-10 flex flex-col items-center pointer-events-none gpu-accel"
-          style={{ bottom: "16%" }}
+          style={{ bottom: "27.5%" }}
         >
           {/* Luminous Atmospheric Halo */}
           <div 
@@ -667,109 +727,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── OBSERVATORY BALCONY DECK & ARENA RAILING ────────── */}
+        {/* ── CENTER: GOLDEN 3D "REGISTER" BUTTON (ON THE MOON) ── */}
         <div 
-          className="absolute left-0 right-0 z-20 pointer-events-none flex flex-col items-center"
-          style={{ bottom: "0px", height: "23%" }}
-        >
-          {/* Curved Railing Top Edge with Electric Neon Glow Trim */}
-          <div 
-            className="w-full relative gpu-accel"
-            style={{
-              height: "44px",
-              borderRadius: "50% 50% 0 0 / 100% 100% 0 0",
-              background: "linear-gradient(180deg, #6322b6 0%, #3e127e 60%, #200845 100%)",
-              boxShadow: `
-                0 -4px 18px rgba(168, 85, 247, 0.6),
-                0 -8px 40px rgba(56, 189, 248, 0.45),
-                inset 0 2px 0 rgba(230, 200, 255, 0.6)
-              `,
-              borderTop: "3px solid #38bdf8",
-            }}
-          >
-            {/* Parapet segments highlight */}
-            <div className="absolute inset-0 flex justify-around opacity-25">
-              {Array.from({ length: 14 }).map((_, i) => (
-                <div key={i} className="w-[1.5px] h-full bg-cyan-200" />
-              ))}
-            </div>
-          </div>
-
-          {/* Arena Floor / Deck Surface in Perspective */}
-          <div 
-            className="w-full flex-1 relative overflow-hidden"
-            style={{
-              background: "linear-gradient(180deg, #1d0741 0%, #100329 55%, #050112 100%)",
-              boxShadow: "inset 0 10px 30px rgba(0,0,0,0.8)",
-            }}
-          >
-            {/* Floor Light Reflections */}
-            <div 
-              className="absolute top-0 left-1/4 right-1/4 h-12"
-              style={{
-                background: "radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.28) 0%, transparent 70%)",
-                filter: "blur(10px)",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* ── CHARACTERS & PROPS ROW (STAGE) ─────────────────── */}
-
-        {/* 1. Left Telescope Turret (Clean Display, No Toast) */}
-        <div 
-          className="absolute z-25 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
-          style={{
-            bottom: "16%",
-            left: "0.5%",
-            width: "clamp(220px, 20vw, 300px)",
-            height: "auto",
-          }}
-          title="Genesis Observatory Telescope"
-        >
-          <div className="relative">
-            <Image
-              src="/assets/glossy-blue-star-emblem-cannon-turret-1.webp"
-              alt="Observatory Telescope Cannon"
-              width={300}
-              height={365}
-              className="w-full h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
-              priority
-            />
-          </div>
-        </div>
-
-        {/* 2. Left Character: COLT (Dual Gunslinger - Subtle Idle Float, No Speech Bubble) */}
-        <div 
-          className="absolute z-26 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
-          style={{
-            bottom: "21%",
-            left: "14%",
-            width: "clamp(240px, 24vw, 370px)",
-            height: "auto",
-            animation: "float-gentle 4.5s ease-in-out infinite",
-          }}
-          title="Colt Gunslinger"
-        >
-          <div className="relative">
-            <Image
-              src="/assets/dual-wielding-neon-gunslinger-1.webp"
-              alt="Colt Gunslinger"
-              width={370}
-              height={290}
-              className="w-full h-auto object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.75)] filter group-hover:brightness-110 transition-all"
-              priority
-            />
-          </div>
-        </div>
-
-        {/* 3. Center: Golden 3D "REGISTER" Button (Static normally, responsive on hover, no modal popup) */}
-        <div 
-          className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gpu-accel"
-          style={{ bottom: "27%" }}
+          className="absolute left-1/2 -translate-x-1/2 z-28 flex flex-col items-center pointer-events-auto gpu-accel"
+          style={{ bottom: "34.5%" }}
         >
           <button
             type="button"
+            onClick={handleRegisterClick}
             className="cursor-pointer relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none"
             aria-label="Register for Genesis Tournament"
           >
@@ -786,17 +751,55 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 4. Right Character: LEON (Chameleon Ninja Brawler - Subtle Idle Float, No Speech Bubble) */}
+        {/* ── CHARACTERS ROW (STANDING BEHIND THE CURVED WALL) ── */}
+
+        {/* 1. Left Character: COLT (Dual Gunslinger - Subtle Idle Float & Blaster Recoil) */}
         <div 
-          className="absolute z-26 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
+          onClick={handleColtClick}
+          className={`absolute z-18 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-pointer ${
+            coltRecoil ? "-translate-y-2 scale-105" : ""
+          }`}
           style={{
-            bottom: "20%",
-            right: "12%",
-            width: "clamp(230px, 23vw, 360px)",
+            bottom: "31.8%",
+            left: "14%",
+            width: "clamp(250px, 26vw, 380px)",
             height: "auto",
-            animation: "float-gentle 4s 1s ease-in-out infinite",
+            animation: !coltRecoil ? "float-gentle 4.5s ease-in-out infinite" : undefined,
           }}
-          title="Leon Brawler"
+          title="Colt Gunslinger - Click to Fire Blasters!"
+        >
+          <div className="relative">
+            <Image
+              src="/assets/dual-wielding-neon-gunslinger-1.webp"
+              alt="Colt Gunslinger"
+              width={370}
+              height={290}
+              className="w-full h-auto object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.75)] filter group-hover:brightness-110 transition-all"
+              priority
+            />
+            {coltRecoil && (
+              <div 
+                className="absolute top-[38%] left-[78%] w-10 h-10 rounded-full bg-cyan-300 blur-sm animate-ping pointer-events-none"
+                style={{ boxShadow: "0 0 20px 8px rgba(56, 189, 248, 0.9)" }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* 2. Right Character: LEON (Chameleon Ninja Brawler - Subtle Idle Float & Shuriken Spin) */}
+        <div 
+          onClick={handleLeonClick}
+          className={`absolute z-18 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-pointer ${
+            leonActive ? "-translate-y-2 scale-105" : ""
+          }`}
+          style={{
+            bottom: "28.5%",
+            right: "12%",
+            width: "clamp(240px, 24vw, 360px)",
+            height: "auto",
+            animation: !leonActive ? "float-gentle 4s 1s ease-in-out infinite" : undefined,
+          }}
+          title="Leon Brawler - Click to Throw Ninja Star!"
         >
           <div className="relative">
             <Image
@@ -807,20 +810,79 @@ export default function Home() {
               className="w-full h-auto object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.75)] filter group-hover:brightness-110 transition-all"
               priority
             />
+            {leonActive && (
+              <div 
+                className="absolute top-[42%] left-[12%] w-8 h-8 rounded-full bg-purple-300 blur-sm animate-spin pointer-events-none"
+                style={{ boxShadow: "0 0 16px 6px rgba(168, 85, 247, 0.9)" }}
+              />
+            )}
           </div>
         </div>
 
-        {/* 5. Bottom Right: Squeak Balloon Character (Idle Float, Original Mascot Artwork, No Speech Popups) */}
+        {/* ── REDESIGNED AUTHENTIC OBSERVATORY BALCONY STAGE & ARENA FLOOR ── */}
         <div 
-          className="absolute z-35 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
+          className="absolute left-0 right-0 bottom-0 z-20 pointer-events-none w-full select-none"
+          style={{
+            height: "35.1%", // Exactly 359px out of 1024px canvas
+            minHeight: "260px",
+          }}
+        >
+          <Image
+            src="/assets/observatory-stage-floor.webp"
+            alt="Genesis Observatory Stage Floor"
+            fill
+            sizes="100vw"
+            className="object-fill object-bottom select-none pointer-events-none"
+            priority
+          />
+        </div>
+
+        {/* ── PROPS SITTING FIRMLY ON THE OBSERVATORY STAGE FLOOR ── */}
+
+        {/* 1. Left Telescope Turret (Grounded on the Deck & Console, Exactly as in Figma) */}
+        <div 
+          onClick={handleTelescopeClick}
+          className="absolute z-25 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-pointer"
+          style={{
+            bottom: "16.5%",
+            left: "0.5%",
+            width: "clamp(220px, 20vw, 300px)",
+            height: "auto",
+          }}
+          title="Genesis Observatory Telescope - Click to Peek!"
+        >
+          <div className="relative">
+            <Image
+              src="/assets/glossy-blue-star-emblem-cannon-turret-1.webp"
+              alt="Observatory Telescope Cannon"
+              width={300}
+              height={365}
+              className="w-full h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
+              priority
+            />
+            {telescopeGlint && (
+              <div 
+                className="absolute top-[32%] left-[58%] w-6 h-6 rounded-full bg-yellow-200 blur-xs animate-ping pointer-events-none"
+                style={{ boxShadow: "0 0 16px 6px rgba(251, 191, 36, 0.95)" }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* 2. Right Squeak Balloon Character (Grounded on the Deck, Floating Bobble & Pop Sound) */}
+        <div 
+          onClick={handleBalloonClick}
+          className={`absolute z-25 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-pointer ${
+            balloonBounced ? "-translate-y-2 scale-106" : ""
+          }`}
           style={{
             bottom: "1.5%",
             right: "1.5%",
             width: "clamp(260px, 25vw, 370px)",
             height: "auto",
-            animation: "balloon-bob 4s ease-in-out infinite",
+            animation: !balloonBounced ? "balloon-bob 4s ease-in-out infinite" : undefined,
           }}
-          title="Squeak Balloon Mascot"
+          title="Fine, you have my full attention. - Click to Bounce!"
         >
           <div className="relative">
             <Image
@@ -834,22 +896,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floating Scroll Cue to About Genesis */}
-        <div 
-          onClick={() => {
-            sounds.playHover();
-            document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-35 flex flex-col items-center cursor-pointer group pointer-events-auto"
-          title="Scroll down to About Genesis"
-        >
-          <div className="px-3.5 sm:px-5 py-1.5 rounded-full bg-blue-950/80 border-2 border-red-500 text-red-100 text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-[0_0_15px_rgba(220,38,38,0.5)] flex items-center gap-1.5 transition-all group-hover:scale-105 group-hover:bg-blue-900 group-hover:border-red-400">
-            <span className="animate-bounce">▼</span>
-            <span>ABOUT GENESIS</span>
-            <span className="animate-bounce">▼</span>
-          </div>
-        </div>
-
       </div>
     </section>
 
@@ -859,7 +905,16 @@ export default function Home() {
     {/* ── SECTION 3: TIMELINE (INTERACTIVE ROADMAP) ──────── */}
     <TimelineSection />
 
-      {/* ── FULL-SCREEN VIEWPORT SIDE DOCK INDICATORS (3 SECTIONS) ──────── */}
+    {/* ── SECTION 4: PRIZE POOL (INTERACTIVE SHOWCASE) ───── */}
+    <PrizePoolSection />
+
+    {/* ── SECTION 5: SPONSORS (RESPONSIVE SHOWCASE) ──────── */}
+    <SponsorsSection />
+
+    {/* ── SECTION 6: FAQS (INTERACTIVE ACCORDION & CATEGORIES) ─ */}
+    <FAQSection />
+
+      {/* ── FULL-SCREEN VIEWPORT SIDE DOCK INDICATORS (6 SECTIONS) ──────── */}
       <aside aria-label="Page Sections" className="fixed right-3 sm:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3 pointer-events-auto">
         <button
           type="button"
@@ -902,6 +957,48 @@ export default function Home() {
           }`}
           title="Genesis Event Timeline"
           aria-label="Genesis Event Timeline"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            document.getElementById("prizepool")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className={`w-3.5 h-3.5 rounded-full transition-all duration-300 border-2 cursor-pointer ${
+            activeSection === "prizepool"
+              ? "bg-yellow-400 border-white scale-125 shadow-[0_0_12px_#facc15]"
+              : "bg-blue-950/80 border-blue-400/50 hover:bg-blue-700 hover:scale-110"
+          }`}
+          title="Genesis Prize Pool"
+          aria-label="Genesis Prize Pool"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            document.getElementById("sponsors")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className={`w-3.5 h-3.5 rounded-full transition-all duration-300 border-2 cursor-pointer ${
+            activeSection === "sponsors"
+              ? "bg-emerald-400 border-white scale-125 shadow-[0_0_12px_#34d399]"
+              : "bg-blue-950/80 border-blue-400/50 hover:bg-blue-700 hover:scale-110"
+          }`}
+          title="Genesis Sponsors"
+          aria-label="Genesis Sponsors"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className={`w-3.5 h-3.5 rounded-full transition-all duration-300 border-2 cursor-pointer ${
+            activeSection === "faq"
+              ? "bg-purple-400 border-white scale-125 shadow-[0_0_12px_#c084fc]"
+              : "bg-blue-950/80 border-blue-400/50 hover:bg-blue-700 hover:scale-110"
+          }`}
+          title="Frequently Asked Questions"
+          aria-label="Frequently Asked Questions"
         />
       </aside>
     </div>

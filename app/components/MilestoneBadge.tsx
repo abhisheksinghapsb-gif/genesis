@@ -6,6 +6,7 @@ interface MilestoneBadgeProps {
   step: "01" | "02" | "03" | "04";
   isActive: boolean;
   isReached: boolean;
+  isHovered?: boolean;
   onClick?: () => void;
   className?: string;
 }
@@ -33,33 +34,39 @@ export default function MilestoneBadge({
   step,
   isActive,
   isReached,
+  isHovered = false,
   onClick,
   className = "",
 }: MilestoneBadgeProps) {
   const numberInfo = NUMBER_PATHS[step];
+  const isHighlighted = isActive || isHovered;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`relative rounded-full select-none cursor-pointer group focus:outline-none transition-all duration-300 ${
+      className={`relative rounded-full select-none cursor-pointer group focus:outline-none transition-all duration-200 ${
         isActive
-          ? "scale-120 z-30 drop-shadow-[0_0_20px_#fbbf24]"
+          ? "scale-110 z-30 drop-shadow-[0_0_12px_#fbbf24]"
+          : isHovered
+          ? "scale-115 z-25 drop-shadow-[0_0_16px_rgba(253,217,68,0.95)]"
           : isReached
-          ? "scale-105 z-20 drop-shadow-[0_0_12px_rgba(253,217,68,0.7)]"
-          : "scale-100 z-10 opacity-80 hover:opacity-100 hover:scale-110 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
+          ? "scale-105 z-20 drop-shadow-[0_0_8px_rgba(253,217,68,0.6)]"
+          : "scale-100 z-10 opacity-80 hover:opacity-100 hover:scale-108 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
       } ${className}`}
       style={{ width: "56px", height: "56px" }}
-      aria-label={`Milestone ${step} - ${isActive ? "Active" : isReached ? "Reached" : "Upcoming"}`}
+      aria-label={`Milestone ${step} - ${isActive ? "Active" : isHovered ? "Hovered" : isReached ? "Reached" : "Upcoming"}`}
       title={`Stage ${step}`}
     >
-      {/* Outer Glow Halo for Active Milestone */}
-      {isActive && (
+      {/* Outer Glow Halo for Active or Hovered Milestone */}
+      {isHighlighted && (
         <div 
-          className="absolute -inset-2.5 rounded-full pointer-events-none animate-pulse"
+          className="absolute -inset-2 rounded-full pointer-events-none transition-opacity duration-200"
           style={{
-            background: "radial-gradient(circle, rgba(251,191,36,0.6) 0%, rgba(245,158,11,0.2) 60%, transparent 80%)",
-            filter: "blur(6px)",
+            background: isActive
+              ? "radial-gradient(circle, rgba(251,191,36,0.5) 0%, rgba(245,158,11,0.2) 60%, transparent 80%)"
+              : "radial-gradient(circle, rgba(253,217,68,0.6) 0%, rgba(245,158,11,0.25) 60%, transparent 80%)",
+            filter: "blur(4px)",
           }}
         />
       )}
@@ -80,7 +87,7 @@ export default function MilestoneBadge({
             cy="35%"
             r="60%"
           >
-            <stop offset="0%" stopColor={isActive ? "#FFF9A5" : "#FFE269"} />
+            <stop offset="0%" stopColor={isHighlighted ? "#FFF9A5" : "#FFE269"} />
             <stop offset="70%" stopColor="#FDD944" />
             <stop offset="100%" stopColor="#F07527" />
           </radialGradient>
@@ -96,8 +103,8 @@ export default function MilestoneBadge({
           cy="28"
           r="26"
           fill={`url(#grad-${step})`}
-          stroke={isActive ? "#FFFFFF" : "#F07527"}
-          strokeWidth={isActive ? "2.5" : "2"}
+          stroke={isHighlighted ? "#FFFFFF" : "#F07527"}
+          strokeWidth={isHighlighted ? "2.5" : "2"}
         />
 
         {/* Inner Highlight Ring */}
@@ -123,7 +130,7 @@ export default function MilestoneBadge({
             {/* White face */}
             <path
               d={numberInfo.d}
-              fill={isActive ? "#FFFFFF" : "#FFFBEB"}
+              fill={isHighlighted ? "#FFFFFF" : "#FFFBEB"}
             />
           </g>
         )}

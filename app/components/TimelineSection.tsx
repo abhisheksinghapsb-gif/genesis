@@ -51,9 +51,17 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
 
   // Interaction states (only updated on discrete changes to eliminate render churn)
   const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const [hoveredStageIndex, setHoveredStageIndex] = useState<number | null>(null);
+  const [pulsingStageIndex, setPulsingStageIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const pulseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Dedicated refs for hardware-accelerated pointer light & track geometry
+  const trackContainerRef = useRef<HTMLDivElement>(null);
+  const hoverLightRef = useRef<HTMLDivElement>(null);
+  const pointerRafRef = useRef<number>(0);
 
   // Drag tracking refs (zero React re-renders during active pointer movement)
   const isPointerDownRef = useRef(false);
@@ -151,6 +159,12 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
 
     sounds.playClick();
     setActiveStageIndex(index);
+    setPulsingStageIndex(index);
+
+    if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
+    pulseTimeoutRef.current = setTimeout(() => {
+      setPulsingStageIndex(null);
+    }, 380);
 
     const viewport = viewportRef.current;
     const targetEl = stageRefs.current[index];
@@ -181,27 +195,62 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isPointerDownRef.current) return;
-    const viewport = viewportRef.current;
-    if (!viewport) return;
+    // If mouse is pressed down, handle horizontal drag
+    if (isPointerDownRef.current) {
+      const viewport = viewportRef.current;
+      if (!viewport) return;
 
-    const dx = e.clientX - startXRef.current;
+      const dx = e.clientX - startXRef.current;
 
-    // Movement threshold to distinguish intent between drag and click
-    if (!hasDraggedRef.current && Math.abs(dx) > 6) {
-      hasDraggedRef.current = true;
-      setIsDragging(true);
-      try {
-        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-      } catch {
-        // Fallback for environments lacking pointer capture
+      // Movement threshold to distinguish intent between drag and click
+      if (!hasDraggedRef.current && Math.abs(dx) > 6) {
+        hasDraggedRef.current = true;
+        setIsDragging(true);
+        if (hoverLightRef.current) {
+          hoverLightRef.current.style.opacity = "0";
+        }
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        } catch {
+          // Fallback for environments lacking pointer capture
+        }
       }
+
+      if (hasDraggedRef.current) {
+        // Direct, responsive 1:1 mouse tracking with no artificial lag
+        viewport.scrollLeft = startScrollLeftRef.current - dx;
+      }
+      return;
     }
 
-    if (hasDraggedRef.current) {
-      // Direct, responsive 1:1 mouse tracking with no artificial lag
-      viewport.scrollLeft = startScrollLeftRef.current - dx;
+    // Pointer Hover Preview (Smooth traveling golden light along the track)
+    if (!isMobile && trackContainerRef.current && hoverLightRef.current) {
+      const clientX = e.clientX;
+      cancelAnimationFrame(pointerRafRef.current);
+      pointerRafRef.current = requestAnimationFrame(() => {
+        const trackEl = trackContainerRef.current;
+        const hoverEl = hoverLightRef.current;
+        if (!trackEl || !hoverEl) return;
+
+        const trackRect = trackEl.getBoundingClientRect();
+        if (trackRect.width <= 0) return;
+
+        // Calculate pointer X relative to the track's current screen position
+        const pointerXInTrack = clientX - trackRect.left;
+        const clampedX = Math.max(0, Math.min(trackRect.width, pointerXInTrack));
+        const pct = (clampedX / trackRect.width) * 100;
+
+        hoverEl.style.left = `${pct}%`;
+        hoverEl.style.opacity = "1";
+      });
     }
+  };
+
+  const handlePointerLeave = () => {
+    if (hoverLightRef.current) {
+      hoverLightRef.current.style.opacity = "0";
+    }
+    setHoveredStageIndex(null);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -218,7 +267,6 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
 
       // Single Authority: Native CSS scroll snap (scrollSnapType: "x mandatory")
       // re-engages and smoothly centers the nearest stage.
-      // We do NOT fire a competing JS scrollTo({ behavior: 'smooth' }), eliminating double-settling jitter.
       setTimeout(() => {
         hasDraggedRef.current = false;
       }, 80);
@@ -242,7 +290,7 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
     <section
       id="timeline"
       ref={sectionRef}
-      className="relative w-screen h-screen min-h-screen snap-start snap-always flex flex-col justify-between overflow-hidden select-none bg-[#030015] text-white flex-shrink-0"
+      className="relative w-screen h-screen min-h-screen flex flex-col justify-between overflow-hidden select-none bg-[#030015] text-white flex-shrink-0"
       aria-label="Genesis Event Timeline Roadmap"
     >
       {/* ── 1. BACKGROUND LAYER: COSMIC BLUE & PURPLE ARTWORK ── */}
@@ -255,6 +303,9 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
           className="w-full h-full object-cover opacity-75"
         />
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#030015]/30 to-[#030015]/85 pointer-events-none" />
+        {/* Subtle Edge Transitions: Visual continuity between About above and Prize Pool below */}
+        <div className="absolute top-0 inset-x-0 h-24 sm:h-32 bg-gradient-to-b from-[#030015] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 inset-x-0 h-24 sm:h-32 bg-gradient-to-t from-[#030015] to-transparent pointer-events-none" />
       </div>
 
       {/* ── 2. STABLE TOP HEADER: PARALLELOGRAM ORANGE BANNER + TIMELINE TITLE ── */}
@@ -290,6 +341,7 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
         className={`timeline-viewport relative flex-1 w-full overflow-x-auto z-20 flex items-center focus:outline-none ${
           isDragging ? "cursor-grabbing is-dragging select-none" : "cursor-grab"
         }`}
@@ -335,6 +387,7 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
           >
             {/* Horizontal Golden Track Line (Centerline passes through milestone badges) */}
             <div
+              ref={trackContainerRef}
               className="absolute left-0 right-0 z-10 pointer-events-none"
               style={{
                 top: isMobile ? "28px" : "calc(50% - 12px)",
@@ -361,16 +414,30 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                   background:
                     "linear-gradient(90deg, #F59E0B 0%, #FDD944 40%, #FFFDE0 90%, #FFFFFF 100%)",
                   boxShadow:
-                    "0 0 8px 1px rgba(253, 217, 68, 0.7), 0 0 14px 2px rgba(245, 158, 11, 0.4), inset 0 1px 0 rgba(255,255,255,0.8)",
+                    "0 0 6px 1px rgba(253, 217, 68, 0.6), inset 0 1px 0 rgba(255,255,255,0.8)",
+                }}
+              />
+
+              {/* Cursor Hover Light Layer (Single independent traveling light following pointer X) */}
+              <div
+                ref={hoverLightRef}
+                className="absolute top-0 h-full pointer-events-none transition-opacity duration-150"
+                style={{
+                  width: "50px",
+                  left: "0%",
+                  transform: "translateX(-50%)",
+                  opacity: 0,
+                  background:
+                    "radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(253, 217, 68, 0.75) 45%, rgba(245, 158, 11, 0) 80%)",
+                  filter: "drop-shadow(0 0 10px #fbbf24) drop-shadow(0 0 20px rgba(253, 217, 68, 0.8))",
                 }}
               >
-                {/* Refined Arcade Comet Head */}
+                {/* Single traveling golden starburst/orb center */}
                 <div
-                  className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full pointer-events-none animate-pulse"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full"
                   style={{
-                    background:
-                      "radial-gradient(circle, #FFFFFF 20%, #FDD944 70%, transparent 100%)",
-                    boxShadow: "0 0 8px 2px #FDD944, 0 0 14px 4px rgba(245, 158, 11, 0.5)",
+                    background: "radial-gradient(circle, #FFFFFF 40%, #FFF9A5 80%, #FDD944 100%)",
+                    boxShadow: "0 0 8px 2px rgba(255, 255, 255, 0.95), 0 0 16px 4px rgba(251, 191, 36, 0.85)",
                   }}
                 />
               </div>
@@ -380,6 +447,8 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
             {TIMELINE_STAGES.map((stage, index) => {
               const isActive = activeStageIndex === index;
               const isReached = index <= activeStageIndex;
+              const isCardHovered = hoveredStageIndex === index;
+              const isPulsing = pulsingStageIndex === index;
 
               return (
                 <div
@@ -410,6 +479,7 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                           step={stage.step}
                           isActive={isActive}
                           isReached={isReached}
+                          isHovered={isCardHovered}
                           onClick={() => handleStageSelect(index)}
                         />
                       </div>
@@ -433,11 +503,19 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                                 handleStageSelect(index);
                               }
                             }}
-                            onMouseEnter={() => sounds.playHover()}
-                            className={`relative cursor-pointer transition-all duration-280 transform-gpu focus:outline-none rounded-2xl ${
-                              isActive
-                                ? "scale-105 z-30 -translate-y-1 drop-shadow-[0_0_20px_rgba(251,191,36,0.85)] brightness-105"
-                                : "scale-100 z-10 opacity-88 hover:opacity-100 hover:scale-102 hover:-translate-y-0.5 drop-shadow-[0_6px_14px_rgba(0,0,0,0.6)]"
+                            onPointerEnter={() => {
+                              setHoveredStageIndex(index);
+                              sounds.playHover();
+                            }}
+                            onPointerLeave={() => {
+                              setHoveredStageIndex(null);
+                            }}
+                            className={`relative cursor-pointer transition-all duration-200 transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-2xl ${
+                              isCardHovered
+                                ? "scale-[1.03] z-25 -translate-y-1 drop-shadow-[0_0_18px_rgba(251,191,36,0.85)] brightness-105"
+                                : isActive
+                                ? "scale-[1.01] z-20 opacity-100 drop-shadow-[0_8px_18px_rgba(0,0,0,0.7)] brightness-102"
+                                : "scale-100 z-10 opacity-85 hover:opacity-100 drop-shadow-[0_6px_14px_rgba(0,0,0,0.6)]"
                             }`}
                             style={{
                               width: "auto",
@@ -453,15 +531,16 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                               draggable={false}
                               className="w-full h-full object-contain pointer-events-none select-none"
                             />
-                            {isActive && (
-                              <div className="absolute inset-0 rounded-2xl ring-2 ring-amber-400 ring-offset-2 ring-offset-transparent pointer-events-none animate-pulse" />
+                            {/* Short click selection pulse that finishes cleanly */}
+                            {isPulsing && (
+                              <div className="absolute inset-0 rounded-2xl ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent pointer-events-none animate-stage-pulse" />
                             )}
                           </div>
 
                           {/* Golden Connector Peg to Milestone */}
                           <div
-                            className={`w-[3px] transition-all duration-280 mt-1.5 ${
-                              isActive || isReached
+                            className={`w-[3px] transition-all duration-200 mt-1.5 ${
+                              isActive || isReached || isCardHovered
                                 ? "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
                                 : "bg-amber-500/60"
                             }`}
@@ -482,8 +561,8 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                         >
                           {/* Golden Connector Peg from Milestone */}
                           <div
-                            className={`w-[3px] transition-all duration-280 mb-1.5 ${
-                              isActive || isReached
+                            className={`w-[3px] transition-all duration-200 mb-1.5 ${
+                              isActive || isReached || isCardHovered
                                 ? "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
                                 : "bg-amber-500/60"
                             }`}
@@ -499,11 +578,19 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                                 handleStageSelect(index);
                               }
                             }}
-                            onMouseEnter={() => sounds.playHover()}
-                            className={`relative cursor-pointer transition-all duration-280 transform-gpu focus:outline-none rounded-2xl ${
-                              isActive
-                                ? "scale-105 z-30 translate-y-1 drop-shadow-[0_0_20px_rgba(251,191,36,0.85)] brightness-105"
-                                : "scale-100 z-10 opacity-88 hover:opacity-100 hover:scale-102 hover:translate-y-0.5 drop-shadow-[0_6px_14px_rgba(0,0,0,0.6)]"
+                            onPointerEnter={() => {
+                              setHoveredStageIndex(index);
+                              sounds.playHover();
+                            }}
+                            onPointerLeave={() => {
+                              setHoveredStageIndex(null);
+                            }}
+                            className={`relative cursor-pointer transition-all duration-200 transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-2xl ${
+                              isCardHovered
+                                ? "scale-[1.03] z-25 translate-y-1 drop-shadow-[0_0_18px_rgba(251,191,36,0.85)] brightness-105"
+                                : isActive
+                                ? "scale-[1.01] z-20 opacity-100 drop-shadow-[0_8px_18px_rgba(0,0,0,0.7)] brightness-102"
+                                : "scale-100 z-10 opacity-85 hover:opacity-100 drop-shadow-[0_6px_14px_rgba(0,0,0,0.6)]"
                             }`}
                             style={{
                               width: "auto",
@@ -519,8 +606,9 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                               draggable={false}
                               className="w-full h-full object-contain pointer-events-none select-none"
                             />
-                            {isActive && (
-                              <div className="absolute inset-0 rounded-2xl ring-2 ring-amber-400 ring-offset-2 ring-offset-transparent pointer-events-none animate-pulse" />
+                            {/* Short click selection pulse that finishes cleanly */}
+                            {isPulsing && (
+                              <div className="absolute inset-0 rounded-2xl ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent pointer-events-none animate-stage-pulse" />
                             )}
                           </div>
                         </div>
@@ -544,10 +632,12 @@ export default function TimelineSection({ onSectionActive }: TimelineSectionProp
                         role="button"
                         tabIndex={0}
                         onClick={() => handleStageSelect(index)}
-                        className={`relative w-full rounded-2xl transition-all duration-300 ${
-                          isActive
-                            ? "scale-102 drop-shadow-[0_0_18px_rgba(251,191,36,0.85)] brightness-105"
-                            : "scale-96 opacity-85"
+                        className={`relative w-full rounded-2xl transition-all duration-200 ${
+                          isPulsing
+                            ? "scale-102 ring-2 ring-amber-300 ring-offset-2 ring-offset-transparent"
+                            : isActive
+                            ? "scale-[1.01] brightness-102"
+                            : "scale-98 opacity-85"
                         }`}
                         style={{
                           aspectRatio: "275 / 416",
