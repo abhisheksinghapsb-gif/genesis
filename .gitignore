@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scratch and test artifacts
+scratch/
+screenshot_*.png
+sponsors_preview_*.png
+preview*.png

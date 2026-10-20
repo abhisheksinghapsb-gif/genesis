@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 const NAV_ITEMS = [
-  { label: "BROCHURE", href: "#brochure" },
+  { label: "BROCHURE", href: "/brochure", external: true },
   { label: "PRIZE", href: "#prize" },
   { label: "SPONSORS", href: "#sponsors" },
 ];
@@ -116,6 +116,8 @@ export default function Navbar() {
           <Link
             key={item.label}
             href={item.href}
+            target={item.external ? "_blank" : undefined}
+            rel={item.external ? "noopener noreferrer" : undefined}
             id={`nav-${item.label.toLowerCase()}`}
             className="flex items-center gap-2 transition-all hover:scale-105 group"
             style={{ textDecoration: "none" }}

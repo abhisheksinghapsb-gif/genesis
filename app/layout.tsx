@@ -24,6 +24,8 @@ const lilitaOne = Lilita_One({
   subsets: ["latin"],
 });
 
+import ClientCleanup from "./components/ClientCleanup";
+
 export const metadata: Metadata = {
   title: "GENESIS — Brawl Stars Club Tournament | GDAI",
   description:
@@ -46,37 +48,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable} ${lilitaOne.variable} h-full antialiased`}
     >
-      <head>
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-        {/* Proactively unregister any legacy Service Worker and clear CacheStorage on localhost */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined') {
-                if ('serviceWorker' in navigator) {
-                  navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for (var i = 0; i < registrations.length; i++) {
-                      registrations[i].unregister();
-                    }
-                  });
-                }
-                if ('caches' in window) {
-                  caches.keys().then(function(names) {
-                    for (var i = 0; i < names.length; i++) {
-                      caches.delete(names[i]);
-                    }
-                  });
-                }
-              }
-            `,
-          }}
-        />
-      </head>
       <body className="min-h-full bg-[#030015] text-white selection:bg-amber-500 selection:text-black">
+        <ClientCleanup />
         {children}
       </body>
     </html>
   );
 }
+

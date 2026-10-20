@@ -9,6 +9,222 @@
   --font-lilita: var(--font-lilita);
 }
 
+:root {
+  --gdai-left-offset: 20px;
+}
+
+/* ── ABOUT SECTION V3: ADAPTIVE FULL-SCREEN & REFERENCE ACCURATE ── */
+.about-section {
+  --about-content-left: clamp(33.5px, 3.5vw, 80px);
+  --about-content-top: clamp(16px, 2.2vh, 32px);
+  --about-heading-left: clamp(60px, 6vw, 102px);
+  --about-heading-width: clamp(440px, 28vw, 522px);
+  --about-panel-width: min(741px, calc(100vw - 80px));
+  --about-panel-height: min(695px, calc(100vh - 245px));
+  --about-panel-overlap-y: clamp(-93.5px, -7.5vh, -78px);
+  --about-panel-padding-top: clamp(68px, 8.2vh, 84px);
+  --about-panel-padding-x: clamp(28px, 2.3vw, 38px);
+  --about-panel-padding-bottom: clamp(22px, 3vh, 34px);
+  --about-text-size: clamp(20.5px, 1.55vw, 25.5px);
+  --about-text-line-height: 1.35;
+  --about-text-weight: 800;
+  --about-text-spacing: clamp(18px, 2.5vh, 30px);
+}
+
+.about-content-wrapper {
+  padding-left: var(--about-content-left);
+  padding-top: var(--about-content-top);
+  padding-right: 24px;
+  padding-bottom: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+.about-heading-group {
+  margin-left: var(--about-heading-left);
+  width: var(--about-heading-width);
+  aspect-ratio: 522 / 302;
+  position: relative;
+  z-index: 20;
+}
+
+.about-emblem {
+  left: 0;
+  top: 5.3%;
+  width: 27.78%;
+  height: 47.35%;
+}
+
+.about-banner {
+  left: 13.03%;
+  top: 0;
+  width: 83.91%;
+  height: 60.93%;
+}
+
+.about-title-genesis {
+  left: 2.30%;
+  top: 41.72%;
+  width: 97.70%;
+  height: 58.28%;
+}
+
+.about-info-panel {
+  position: relative;
+  z-index: 15;
+  margin-top: var(--about-panel-overlap-y);
+  width: var(--about-panel-width);
+  height: var(--about-panel-height, auto);
+  max-height: calc(100vh - 220px);
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.85));
+  display: flex;
+  flex-direction: column;
+}
+
+.about-panel-content {
+  padding-top: var(--about-panel-padding-top);
+  padding-left: var(--about-panel-padding-x);
+  padding-right: var(--about-panel-padding-x);
+  padding-bottom: var(--about-panel-padding-bottom);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: var(--about-text-weight, 800);
+  color: #000000;
+  letter-spacing: -0.015em;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.about-description-p {
+  font-size: var(--about-text-size);
+  line-height: var(--about-text-line-height);
+  font-weight: inherit;
+  color: #000000;
+  margin: 0;
+}
+
+.about-description-p + .about-description-p {
+  margin-top: var(--about-text-spacing);
+}
+
+.about-texture-glow {
+  top: 43px;
+  left: clamp(380px, 29.5vw, 425px);
+  width: min(1015px, 70vw);
+  height: auto;
+  opacity: 0.49;
+}
+
+.about-overlay-gradient {
+  width: clamp(520px, 62vw, 927px);
+  background: linear-gradient(
+    to right,
+    rgba(3, 0, 21, 0.95) 0%,
+    rgba(3, 0, 21, 0.82) 48%,
+    rgba(3, 0, 21, 0.52) 75%,
+    rgba(3, 0, 21, 0) 100%
+  );
+}
+
+/* ── Proportional Scaling for Standard Laptop (1366x768) ── */
+@media (min-width: 1025px) and (max-width: 1399px), (min-width: 1025px) and (max-height: 800px) and (max-width: 1600px) {
+  .about-section {
+    --about-content-left: clamp(24px, 3vw, 44px);
+    --about-content-top: 18px;
+    --about-heading-left: 82px;
+    --about-heading-width: 428px;
+    --about-panel-width: 608px;
+    --about-panel-height: min(570px, calc(100vh - 210px));
+    --about-panel-overlap-y: -76px;
+    --about-panel-padding-top: 70px;
+    --about-panel-padding-x: 30px;
+    --about-panel-padding-bottom: 32px;
+    --about-text-size: 21.5px;
+    --about-text-line-height: 1.36;
+    --about-text-spacing: 28px;
+  }
+}
+
+/* ── Tablet Landscape (1024x768) ── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .about-section {
+    --about-content-left: 24px;
+    --about-content-top: 18px;
+    --about-heading-left: 60px;
+    --about-heading-width: 410px;
+    --about-panel-width: 580px;
+    --about-panel-height: min(544px, calc(100vh - 210px));
+    --about-panel-overlap-y: -72px;
+    --about-panel-padding-top: 66px;
+    --about-panel-padding-x: 28px;
+    --about-panel-padding-bottom: 30px;
+    --about-text-size: 20px;
+    --about-text-line-height: 1.36;
+    --about-text-spacing: 24px;
+  }
+}
+
+/* ── Tablet Portrait (768x1024) ── */
+@media (max-width: 768px) {
+  .about-section {
+    --about-content-left: 24px;
+    --about-content-top: 24px;
+    --about-heading-left: 20px;
+    --about-heading-width: min(100%, 450px);
+    --about-panel-width: min(100%, 650px);
+    --about-panel-height: min(609px, calc(100vh - 240px));
+    --about-panel-overlap-y: -75px;
+    --about-panel-padding-top: 74px;
+    --about-panel-padding-x: 30px;
+    --about-panel-padding-bottom: 34px;
+    --about-text-size: 22px;
+    --about-text-line-height: 1.36;
+    --about-text-spacing: 28px;
+  }
+
+  .about-overlay-gradient {
+    width: 100vw;
+    background: linear-gradient(
+      to bottom,
+      rgba(3, 0, 21, 0.78) 0%,
+      rgba(3, 0, 21, 0.92) 28%,
+      rgba(3, 0, 21, 0.85) 100%
+    );
+  }
+}
+
+/* ── Mobile Portrait (390px, 375px) ── */
+@media (max-width: 480px) {
+  .about-section {
+    --about-content-left: 16px;
+    --about-content-top: 16px;
+    --about-heading-left: 0px;
+    --about-heading-width: 100%;
+    --about-panel-width: 100%;
+    --about-panel-height: auto;
+    --about-panel-overlap-y: 12px;
+    --about-panel-padding-top: 44px;
+    --about-panel-padding-x: 18px;
+    --about-panel-padding-bottom: 22px;
+    --about-text-size: 14.5px;
+    --about-text-line-height: 1.32;
+    --about-text-spacing: 14px;
+  }
+}
+
+/* ── Small & Narrow Mobile (360px, 320px) ── */
+@media (max-width: 360px) {
+  .about-section {
+    --about-content-left: 10px;
+    --about-content-top: 12px;
+    --about-panel-padding-top: 38px;
+    --about-panel-padding-x: 14px;
+    --about-panel-padding-bottom: 18px;
+    --about-text-size: 13.5px;
+    --about-text-line-height: 1.3;
+    --about-text-spacing: 12px;
+  }
+}
+
 *,
 *::before,
 *::after {
@@ -211,6 +427,63 @@ body {
   }
 }
 
+@keyframes planet-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes planet-spin-reverse {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes planet-spin-slow {
+  0%, 100% {
+    transform: perspective(850px) rotate(-26deg) rotateY(-22deg) rotate(26deg) scale3d(1, 1, 1);
+  }
+  50% {
+    transform: perspective(850px) rotate(-26deg) rotateY(22deg) rotate(26deg) scale3d(1.03, 1.03, 1);
+  }
+}
+
+@keyframes planet-ring-natural {
+  0%, 100% {
+    transform: perspective(850px) rotate(-26deg) rotateY(-22deg) rotate(26deg) scale3d(1, 1, 1);
+  }
+  50% {
+    transform: perspective(850px) rotate(-26deg) rotateY(22deg) rotate(26deg) scale3d(1.03, 1.03, 1);
+  }
+}
+
+@keyframes planet-ring-direction {
+  0%, 100% {
+    transform: perspective(850px) rotate(-26deg) rotateY(-22deg) rotate(26deg) scale3d(1, 1, 1);
+  }
+  50% {
+    transform: perspective(850px) rotate(-26deg) rotateY(22deg) rotate(26deg) scale3d(1.03, 1.03, 1);
+  }
+}
+
+@keyframes asteroid-tumble {
+  0% {
+    transform: perspective(600px) rotate(0deg) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: perspective(600px) rotate(180deg) rotateX(16deg) rotateY(16deg);
+  }
+  100% {
+    transform: perspective(600px) rotate(360deg) rotateX(0deg) rotateY(0deg);
+  }
+}
+
 @keyframes glint {
   0%, 100% {
     opacity: 0;
@@ -227,4 +500,163 @@ body {
   will-change: transform, opacity;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+}
+
+/* ── Brawl Stars Sponsors Animations & Utilities ─────────── */
+@keyframes coin-float {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) rotate(3deg);
+  }
+}
+
+@keyframes gem-sparkle {
+  0%, 100% {
+    transform: scale3d(1, 1, 1) rotate(0deg);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+  }
+  50% {
+    transform: scale3d(1.15, 1.15, 1) rotate(6deg);
+    filter: drop-shadow(0 0 18px rgba(56, 189, 248, 0.85));
+  }
+}
+
+@keyframes badge-wobble {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.15) rotate(-6deg);
+  }
+  75% {
+    transform: scale(1.15) rotate(6deg);
+  }
+}
+
+@keyframes spike-eye-blink {
+  0%, 90%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  95% {
+    opacity: 0.1;
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes shine-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(250%) skewX(-25deg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-shimmer {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.brawl-title-stroke {
+  font-family: var(--font-lilita), sans-serif;
+  -webkit-text-stroke: 1.5px #000;
+  text-shadow: 0 4px 0 #000, 0 6px 12px rgba(0, 0, 0, 0.7);
+}
+
+.brawl-stroke-sm {
+  font-family: var(--font-lilita), sans-serif;
+  -webkit-text-stroke: 0.8px #000;
+  text-shadow: 0 2px 0 #000;
+}
+
+/* ── Prize Pool Interactive Animations ── */
+@keyframes brawler-shake {
+  0%, 100% {
+    transform: translateY(-10px) scale(1.08) rotate(0deg);
+  }
+  20% {
+    transform: translateY(-12px) scale(1.10) rotate(-2.5deg) translate3d(-3px, -2px, 0);
+  }
+  40% {
+    transform: translateY(-10px) scale(1.08) rotate(2deg) translate3d(3px, -1px, 0);
+  }
+  60% {
+    transform: translateY(-12px) scale(1.10) rotate(-2deg) translate3d(-2px, 2px, 0);
+  }
+  80% {
+    transform: translateY(-10px) scale(1.08) rotate(1.5deg) translate3d(2px, -2px, 0);
+  }
+}
+
+@keyframes arena-card-shake {
+  0%, 100% {
+    transform: translateY(-4px) scale(1.012) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) scale(1.012) rotate(-0.4deg);
+  }
+  75% {
+    transform: translateY(-4px) scale(1.012) rotate(0.4deg);
+  }
+}
+
+@keyframes badge-shimmer-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  65% {
+    transform: translateX(180%) skewX(-25deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(180%) skewX(-25deg);
+    opacity: 0;
+  }
+}
+
+.animate-brawler-shake {
+  animation: brawler-shake 0.45s ease-in-out infinite;
+}
+
+.animate-arena-shake {
+  animation: arena-card-shake 0.6s ease-in-out infinite;
+}
+
+/* ── NATIVE HORIZONTAL TIMELINE VIEWPORT ── */
+.timeline-viewport::-webkit-scrollbar {
+  display: none;
+}
+.timeline-viewport {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

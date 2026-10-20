@@ -3,11 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { sounds } from "./components/sound";
-import RegistrationModal from "./components/RegistrationModal";
-import BrochureModal from "./components/BrochureModal";
-import PrizeModal from "./components/PrizeModal";
-import SponsorsModal from "./components/SponsorsModal";
-import MenuDrawer from "./components/MenuDrawer";
+import AboutSection from "./components/AboutSection";
+import TimelineSection from "./components/TimelineSection";
 
 // Deterministic twinkling stars with individual drift offsets
 const STARS = Array.from({ length: 90 }, (_, i) => ({
@@ -21,39 +18,16 @@ const STARS = Array.from({ length: 90 }, (_, i) => ({
   driftDuration: 8 + (i % 7) * 2,
 }));
 
-// Squeak character quotes
-const SQUEAK_QUOTES = [
-  "Fine, you have my full attention.",
-  "Ready for the 3v3 Brawl Ball Showdown?!",
-  "Don't drop the 10 gems in the mine!",
-  "Only true legends lift the Genesis Trophy!",
-  "Register your trio before slots vanish!",
-  "GDAI Tournament of the Year is HERE!",
-];
-
 export default function Home() {
-  // Modal states
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [isBrochureOpen, setIsBrochureOpen] = useState(false);
-  const [isPrizeOpen, setIsPrizeOpen] = useState(false);
-  const [isSponsorsOpen, setIsSponsorsOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Sound mute state
+  // Sound mute state (Controls arcade SFX without opening any overlay)
   const [isMuted, setIsMuted] = useState(false);
-
-  // Interactive Easter eggs & character reactions
-  const [squeakIndex, setSqueakIndex] = useState(0);
-  const [squeakBounce, setSqueakBounce] = useState(false);
-  const [coltQuote, setColtQuote] = useState<string | null>(null);
-  const [leonQuote, setLeonQuote] = useState<string | null>(null);
-  const [telescopeGlint, setTelescopeGlint] = useState(false);
 
   // 3D Interactive Tilt & Container Refs (Zero React Re-render on Mouse Move!)
   const containerRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
-  const [isLogoClicked, setIsLogoClicked] = useState(false);
+  const [activeSection, setActiveSection] = useState<"hero" | "about" | "timeline">("hero");
+  const lastSectionRef = useRef<"hero" | "about" | "timeline">("hero");
 
   useEffect(() => {
     let rafId: number;
@@ -73,6 +47,60 @@ export default function Home() {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  // Smooth Scroll & Viewport Tracker
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const scrollY = container.scrollTop;
+      const height = window.innerHeight;
+      const aboutEl = document.getElementById("about");
+      const timelineEl = document.getElementById("timeline");
+
+      const aboutTop = aboutEl?.offsetTop || height;
+      const timelineTop = timelineEl?.offsetTop || height * 2;
+
+      let current: "hero" | "about" | "timeline" = "hero";
+      if (scrollY >= timelineTop - height * 0.35) {
+        current = "timeline";
+      } else if (scrollY >= aboutTop - height * 0.35) {
+        current = "about";
+      } else {
+        current = "hero";
+      }
+
+      if (current !== lastSectionRef.current) {
+        lastSectionRef.current = current;
+        setActiveSection(current);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        if (lastSectionRef.current === "hero") {
+          document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "about") {
+          document.getElementById("timeline")?.scrollIntoView({ behavior: "smooth" });
+        }
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        if (lastSectionRef.current === "timeline") {
+          document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+        } else if (lastSectionRef.current === "about") {
+          document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -105,63 +133,35 @@ export default function Home() {
     }
   };
 
-  const handleLogoClick = () => {
-    sounds.playRegister();
-    setIsLogoClicked(true);
-    setTimeout(() => setIsLogoClicked(false), 500);
-  };
-
   const toggleMute = () => {
     const next = !isMuted;
     setIsMuted(next);
     sounds.setMuted(next);
   };
 
-  const handleSqueakClick = () => {
-    sounds.playPop();
-    setSqueakBounce(true);
-    setSqueakIndex((prev) => (prev + 1) % SQUEAK_QUOTES.length);
-    setTimeout(() => setSqueakBounce(false), 500);
-  };
 
-  const handleColtClick = () => {
-    sounds.playLaser();
-    const quotes = ["Watch out, here I come!", "Too pretty for pain!", "Brawn and beauty!"];
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    setColtQuote(randomQuote);
-    setTimeout(() => setColtQuote(null), 3000);
-  };
-
-  const handleLeonClick = () => {
-    sounds.playShuriken();
-    const quotes = ["Sneaky time!", "Don't look at me!", "Leon in the lead!"];
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    setLeonQuote(randomQuote);
-    setTimeout(() => setLeonQuote(null), 3000);
-  };
-
-  const handleTelescopeClick = () => {
-    sounds.playHover();
-    setTelescopeGlint(true);
-    setTimeout(() => setTelescopeGlint(false), 2000);
-  };
 
   return (
-    <main 
+    <div 
       ref={containerRef}
-      className="relative w-screen h-screen overflow-hidden bg-[#030015] flex items-center justify-center select-none"
+      className="relative w-screen h-screen overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth select-none bg-[#030015]"
       style={{
         ["--mx" as string]: 0,
         ["--my" as string]: 0,
       }}
     >
-      {/* ── Scaled Widescreen Canvas Container ──────────────── */}
-      <div 
-        className="relative w-full h-full max-w-[1700px] max-h-[1100px] overflow-hidden"
-        style={{
-          background: "radial-gradient(ellipse at 50% 32%, #180946 0%, #0d0426 42%, #030014 100%)",
-        }}
+      {/* ── SECTION 1: HERO VIEWPORT (FULL SCREEN 100VH) ───── */}
+      <section 
+        id="hero"
+        className="relative w-screen h-screen min-h-screen snap-start snap-always flex items-center justify-center overflow-hidden flex-shrink-0"
       >
+        {/* ── Scaled Widescreen Canvas Container ──────────────── */}
+        <div 
+          className="relative w-full h-full max-w-[1700px] max-h-[1100px] overflow-hidden"
+          style={{
+            background: "radial-gradient(ellipse at 50% 32%, #180946 0%, #0d0426 42%, #030014 100%)",
+          }}
+        >
         {/* ── Ambient Cosmic Nebula Glow ─────────────────────── */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-45 gpu-accel"
@@ -200,16 +200,18 @@ export default function Home() {
           ))}
         </div>
 
-        {/* ── NATURALLY FALLING METEORS & COMETS (GPU ACCELERATED) ── */}
+        {/* ── NATURALLY FALLING METEORS & COMETS (GPU ACCELERATED & IMMEDIATE MOTION) ── */}
         {/* Meteor 1: Hero Large Meteor blazing across upper-left */}
         <div 
-          className="absolute pointer-events-none z-10 gpu-accel"
+          className="absolute pointer-events-none z-10 gpu-accel opacity-0"
           style={{
             top: "6%",
             left: "14%",
             width: "320px",
             height: "160px",
-            animation: "meteor-fluent-1 2.8s 0s infinite linear",
+            transform: "translate3d(-260px, -130px, 0)",
+            animation: "meteor-fluent-1 2.8s -1.4s infinite linear both",
+            willChange: "transform, opacity",
           }}
         >
           <Image
@@ -224,13 +226,15 @@ export default function Home() {
 
         {/* Meteor 2: Upper Mid-Right shooting comet */}
         <div 
-          className="absolute pointer-events-none z-10 gpu-accel"
+          className="absolute pointer-events-none z-10 gpu-accel opacity-0"
           style={{
             top: "8%",
             right: "24%",
             width: "200px",
             height: "100px",
-            animation: "meteor-fluent-2 3.2s 1.2s infinite linear",
+            transform: "translate3d(-220px, -110px, 0)",
+            animation: "meteor-fluent-2 3.2s -0.8s infinite linear both",
+            willChange: "transform, opacity",
           }}
         >
           <Image
@@ -244,13 +248,15 @@ export default function Home() {
 
         {/* Meteor 3: Mid-Left diagonal falling star */}
         <div 
-          className="absolute pointer-events-none z-10 gpu-accel"
+          className="absolute pointer-events-none z-10 gpu-accel opacity-0"
           style={{
             top: "20%",
             left: "22%",
             width: "180px",
             height: "90px",
-            animation: "meteor-fluent-3 2.9s 2.4s infinite linear",
+            transform: "translate3d(-180px, -90px, 0)",
+            animation: "meteor-fluent-3 2.9s -2.1s infinite linear both",
+            willChange: "transform, opacity",
           }}
         >
           <Image
@@ -264,13 +270,15 @@ export default function Home() {
 
         {/* Meteor 4: Deep Right falling comet */}
         <div 
-          className="absolute pointer-events-none z-10 gpu-accel"
+          className="absolute pointer-events-none z-10 gpu-accel opacity-0"
           style={{
             top: "28%",
             right: "10%",
             width: "170px",
             height: "85px",
-            animation: "meteor-fluent-4 2.6s 3.6s infinite linear",
+            transform: "translate3d(-200px, -100px, 0)",
+            animation: "meteor-fluent-4 2.6s -1.0s infinite linear both",
+            willChange: "transform, opacity",
           }}
         >
           <Image
@@ -284,13 +292,15 @@ export default function Home() {
 
         {/* Meteor 5: Center-Right high altitude meteor */}
         <div 
-          className="absolute pointer-events-none z-10 gpu-accel"
+          className="absolute pointer-events-none z-10 gpu-accel opacity-0"
           style={{
             top: "14%",
             left: "48%",
             width: "160px",
             height: "80px",
-            animation: "meteor-fluent-2 3.4s 4.8s infinite linear",
+            transform: "translate3d(-220px, -110px, 0)",
+            animation: "meteor-fluent-2 3.4s -2.5s infinite linear both",
+            willChange: "transform, opacity",
           }}
         >
           <Image
@@ -315,13 +325,15 @@ export default function Home() {
             animation: "planet-float 7s ease-in-out infinite",
           }}
         >
-          <Image
-            src="/assets/glossy-blue-planet-icon-1.webp"
-            alt="Blue Planet"
-            width={145}
-            height={140}
-            className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.35)]"
-          />
+          <div className="w-full h-full gpu-accel" style={{ animation: "planet-spin 28s linear infinite" }}>
+            <Image
+              src="/assets/glossy-blue-planet-icon-1.webp"
+              alt="Blue Planet"
+              width={145}
+              height={140}
+              className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.35)]"
+            />
+          </div>
         </div>
 
         {/* Small Blue Planet (Upper Mid-Left) */}
@@ -335,13 +347,15 @@ export default function Home() {
             animation: "planet-float 9s 1.5s ease-in-out infinite",
           }}
         >
-          <Image
-            src="/assets/glossy-blue-planet-icon-3.webp"
-            alt="Small Blue Planet"
-            width={42}
-            height={42}
-            className="w-full h-full object-contain"
-          />
+          <div className="w-full h-full gpu-accel" style={{ animation: "planet-spin 18s linear infinite" }}>
+            <Image
+              src="/assets/glossy-blue-planet-icon-3.webp"
+              alt="Small Blue Planet"
+              width={42}
+              height={42}
+              className="w-full h-full object-contain"
+            />
+          </div>
         </div>
 
         {/* Saturn-like Purple Ringed Planet (Top Right) */}
@@ -356,13 +370,15 @@ export default function Home() {
             animation: "planet-float 8.5s 1s ease-in-out infinite",
           }}
         >
-          <Image
-            src="/assets/neon-purple-ringed-planet-1.webp"
-            alt="Purple Ringed Planet"
-            width={330}
-            height={170}
-            className="w-full h-full object-contain drop-shadow-[0_0_28px_rgba(168,85,247,0.4)]"
-          />
+          <div className="w-full h-full gpu-accel" style={{ animation: "planet-ring-natural 9s ease-in-out infinite" }}>
+            <Image
+              src="/assets/neon-purple-ringed-planet-1.webp"
+              alt="Purple Ringed Planet"
+              width={330}
+              height={170}
+              className="w-full h-full object-contain drop-shadow-[0_0_28px_rgba(168,85,247,0.4)]"
+            />
+          </div>
         </div>
 
         {/* Medium Blue Planet (Mid Right) */}
@@ -376,13 +392,15 @@ export default function Home() {
             animation: "planet-float 6.5s 2s ease-in-out infinite",
           }}
         >
-          <Image
-            src="/assets/glossy-blue-planet-icon-2.webp"
-            alt="Medium Blue Planet"
-            width={85}
-            height={82}
-            className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]"
-          />
+          <div className="w-full h-full gpu-accel" style={{ animation: "planet-spin-reverse 24s linear infinite" }}>
+            <Image
+              src="/assets/glossy-blue-planet-icon-2.webp"
+              alt="Medium Blue Planet"
+              width={85}
+              height={82}
+              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+            />
+          </div>
         </div>
 
         {/* Floating Violet Asteroid Rocks */}
@@ -396,25 +414,30 @@ export default function Home() {
             animation: "planet-float 10s 3s ease-in-out infinite",
           }}
         >
-          <Image
-            src="/assets/glossy-violet-asteroid-rock-1-1.webp"
-            alt="Asteroid Rock"
-            width={60}
-            height={55}
-            className="w-full h-full object-contain opacity-85"
-          />
+          <div className="w-full h-full gpu-accel" style={{ animation: "asteroid-tumble 18s linear infinite" }}>
+            <Image
+              src="/assets/glossy-violet-asteroid-rock-1-1.webp"
+              alt="Asteroid Rock"
+              width={60}
+              height={55}
+              className="w-full h-full object-contain opacity-85"
+            />
+          </div>
         </div>
 
         {/* ── TOP NAVIGATION BAR ─────────────────────────────── */}
         <header className="absolute top-0 left-0 right-0 z-30 flex items-start justify-between px-6 pt-2 pointer-events-none">
-          {/* Top-Left: GDAI Club Banner */}
-          <div 
-            className="pointer-events-auto cursor-pointer group transition-transform duration-300"
-            style={{ animation: "banner-sway 4s ease-in-out infinite" }}
-            onClick={() => {
-              sounds.playHover();
-              setIsMenuOpen(true);
+          {/* Top-Left: GDAI Club Banner (Semantic external link to IndieConnect in current tab) */}
+          <a
+            href="https://www.indieconnect.in/"
+            target="_self"
+            rel="noopener noreferrer"
+            className="pointer-events-auto group transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg block cursor-pointer"
+            style={{
+              animation: "banner-sway 4s ease-in-out infinite",
+              marginLeft: "var(--gdai-left-offset, 20px)",
             }}
+            aria-label="Visit IndieConnect (GDAI Club)"
           >
             <div className="relative">
               <Image
@@ -429,95 +452,81 @@ export default function Home() {
                 GDAI CLUB
               </span>
             </div>
-          </div>
+          </a>
 
-          {/* Top-Center: Interactive Navigation Buttons */}
-          <nav className="pointer-events-auto flex items-center justify-center gap-6 mt-3">
-            {/* BROCHURE Button */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setIsBrochureOpen(true);
-              }}
-              onMouseEnter={() => sounds.playHover()}
-              className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none"
-              aria-label="View Event Brochure"
+          {/* Top-Center: Navigation Buttons (BROCHURE — PRIZE — SPONSORS) */}
+          <nav className="pointer-events-auto flex items-center justify-center gap-2.5 sm:gap-4 md:gap-6 mt-3">
+            {/* 1. BROCHURE Button (Opens the Genesis Brochure PDF in a new tab) */}
+            <a
+              href="/brochure"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none cursor-pointer block"
+              aria-label="Open Genesis Tournament Brochure (PDF) - Opens in new tab"
             >
               <Image
                 src="/assets/nav-brochure.webp"
                 alt="BROCHURE"
                 width={195}
                 height={42}
-                className="h-9 md:h-11 w-auto object-contain drop-shadow-[0_4px_8px_rgba(6,182,212,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(6,182,212,0.85)]"
+                className="h-8 sm:h-9 md:h-11 w-auto object-contain drop-shadow-[0_4px_8px_rgba(6,182,212,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(6,182,212,0.85)]"
                 priority
               />
-            </button>
+            </a>
 
-            {/* PRIZE Button */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setIsPrizeOpen(true);
-              }}
-              onMouseEnter={() => sounds.playHover()}
-              className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none"
-              aria-label="View Tournament Prizes"
+            {/* 2. PRIZE Button (Visually restored per original Figma reference, nonfunctional) */}
+            <div
+              className="relative transition-transform duration-200 hover:scale-105 select-none cursor-default block"
+              aria-label="Prize Pool"
             >
               <Image
                 src="/assets/nav-prize.webp"
                 alt="PRIZE"
-                width={175}
-                height={42}
-                className="h-9 md:h-11 w-auto object-contain drop-shadow-[0_4px_8px_rgba(250,204,21,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,0.85)]"
+                width={195}
+                height={46}
+                className="h-8 sm:h-9 md:h-11 w-auto object-contain drop-shadow-[0_4px_8px_rgba(234,179,8,0.35)]"
                 priority
               />
-            </button>
+            </div>
 
-            {/* SPONSORS Button */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setIsSponsorsOpen(true);
-              }}
-              onMouseEnter={() => sounds.playHover()}
-              className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none"
-              aria-label="View Sponsors"
+            {/* 3. SPONSORS Button (Visually restored per original Figma reference, nonfunctional) */}
+            <div
+              className="relative transition-transform duration-200 hover:scale-105 select-none cursor-default block"
+              aria-label="Sponsors"
             >
               <Image
                 src="/assets/nav-sponsors.webp"
                 alt="SPONSORS"
-                width={200}
-                height={42}
-                className="h-9 md:h-11 w-auto object-contain drop-shadow-[0_4px_8px_rgba(52,211,153,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(52,211,153,0.85)]"
+                width={195}
+                height={44}
+                className="h-8 sm:h-9 md:h-11 w-auto object-contain drop-shadow-[0_4px_8px_rgba(34,197,94,0.35)]"
                 priority
               />
-            </button>
+            </div>
           </nav>
 
           {/* Top-Right: Settings / Menu Button & Sound Mute Toggle */}
           <div className="pointer-events-auto flex items-center gap-3 mt-3">
             {/* Quick Audio Toggle */}
             <button
+              type="button"
               onClick={toggleMute}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold border transition-all hover:scale-110 active:scale-90 ${
+              className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold border transition-all hover:scale-110 active:scale-90 cursor-pointer ${
                 !isMuted 
                   ? "bg-purple-900/60 border-purple-500/60 text-purple-200 shadow-[0_0_12px_rgba(168,85,247,0.4)]" 
                   : "bg-red-950/70 border-red-500/60 text-red-300"
               }`}
               title={!isMuted ? "Mute Arcade SFX" : "Unmute Arcade SFX"}
+              aria-label={!isMuted ? "Mute Arcade SFX" : "Unmute Arcade SFX"}
             >
               {!isMuted ? "🔊" : "🔇"}
             </button>
 
-            {/* Menu Hamburger Button */}
+            {/* Menu Hamburger Button (Preserved Visuals & Placement, No Drawer Overlay) */}
             <button
-              onClick={() => {
-                sounds.playClick();
-                setIsMenuOpen(true);
-              }}
-              onMouseEnter={() => sounds.playHover()}
-              className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none"
-              aria-label="Open Navigation Menu"
+              type="button"
+              className="relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none cursor-default"
+              aria-label="Navigation Menu"
             >
               <Image
                 src="/assets/btn-settings.webp"
@@ -531,7 +540,7 @@ export default function Home() {
           </div>
         </header>
 
-        {/* ── CENTER HERO: BRAWL STARS / GENESIS LOGO (SMOOTH 3D TILT) ── */}
+        {/* ── CENTER HERO: BRAWL STARS / GENESIS LOGO (SMOOTH 3D TILT & GLINT) ── */}
         <div 
           className="absolute top-[10%] left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none gpu-accel"
           style={{
@@ -543,14 +552,13 @@ export default function Home() {
             onMouseMove={handleLogoMouseMove}
             onMouseEnter={handleLogoMouseEnter}
             onMouseLeave={handleLogoMouseLeave}
-            onClick={handleLogoClick}
-            className="relative pointer-events-auto cursor-pointer group select-none gpu-accel"
+            className="relative pointer-events-auto select-none gpu-accel cursor-default"
             style={{
               perspective: "800px",
               transformStyle: "preserve-3d",
               filter: "drop-shadow(0 8px 18px rgba(0,0,0,0.75))",
             }}
-            title="Genesis Emblem • Click for Victory Powerup!"
+            title="Genesis Emblem"
           >
             {/* The Main Genesis Title & Winged Brawl Star Skull Asset */}
             <Image
@@ -558,9 +566,7 @@ export default function Home() {
               alt="GENESIS Tournament Brawl Stars Logo"
               width={460}
               height={290}
-              className={`w-[340px] md:w-[440px] lg:w-[490px] h-auto object-contain transition-transform ${
-                isLogoClicked ? "scale-110" : ""
-              }`}
+              className="w-[340px] md:w-[440px] lg:w-[490px] h-auto object-contain"
               priority
             />
 
@@ -710,17 +716,16 @@ export default function Home() {
 
         {/* ── CHARACTERS & PROPS ROW (STAGE) ─────────────────── */}
 
-        {/* 1. Left Telescope Turret */}
+        {/* 1. Left Telescope Turret (Clean Display, No Toast) */}
         <div 
-          onClick={handleTelescopeClick}
-          className="absolute z-25 cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 group gpu-accel"
+          className="absolute z-25 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
           style={{
             bottom: "16%",
             left: "0.5%",
             width: "clamp(220px, 20vw, 300px)",
             height: "auto",
           }}
-          title="Click to peek through the Genesis Observatory Telescope!"
+          title="Genesis Observatory Telescope"
         >
           <div className="relative">
             <Image
@@ -728,23 +733,15 @@ export default function Home() {
               alt="Observatory Telescope Cannon"
               width={300}
               height={365}
-              className={`w-full h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] ${
-                telescopeGlint ? "brightness-125 filter" : ""
-              }`}
+              className="w-full h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
               priority
             />
-            {telescopeGlint && (
-              <div className="absolute -top-12 left-16 px-3 py-1.5 rounded-lg bg-sky-950/90 border border-cyan-400 text-cyan-200 text-xs font-bold whitespace-nowrap shadow-lg animate-bounce">
-                🔭 Scanning Sector 7 Brawl Arena... Target Acquired!
-              </div>
-            )}
           </div>
         </div>
 
-        {/* 2. Left Character: COLT (Dual Gunslinger) */}
+        {/* 2. Left Character: COLT (Dual Gunslinger - Subtle Idle Float, No Speech Bubble) */}
         <div 
-          onClick={handleColtClick}
-          className="absolute z-26 cursor-pointer transition-transform duration-300 hover:scale-105 group gpu-accel"
+          className="absolute z-26 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
           style={{
             bottom: "21%",
             left: "14%",
@@ -752,7 +749,7 @@ export default function Home() {
             height: "auto",
             animation: "float-gentle 4.5s ease-in-out infinite",
           }}
-          title="Click Colt to fire lasers & talk!"
+          title="Colt Gunslinger"
         >
           <div className="relative">
             <Image
@@ -763,31 +760,17 @@ export default function Home() {
               className="w-full h-auto object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.75)] filter group-hover:brightness-110 transition-all"
               priority
             />
-            {/* Colt Dialogue Bubble */}
-            {coltQuote && (
-              <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 rounded-2xl bg-white text-slate-900 font-extrabold text-sm whitespace-nowrap shadow-2xl border-2 border-slate-900 animate-fadeIn">
-                {coltQuote}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white" />
-              </div>
-            )}
           </div>
         </div>
 
-        {/* 3. Center: Golden 3D "REGISTER" Button */}
+        {/* 3. Center: Golden 3D "REGISTER" Button (Static normally, responsive on hover, no modal popup) */}
         <div 
           className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gpu-accel"
           style={{ bottom: "27%" }}
         >
           <button
-            onClick={() => {
-              sounds.playRegister();
-              setIsRegisterOpen(true);
-            }}
-            onMouseEnter={() => sounds.playHover()}
+            type="button"
             className="cursor-pointer relative transition-all duration-200 hover:scale-108 active:scale-95 group focus:outline-none"
-            style={{
-              animation: "register-pulse 3s ease-in-out infinite",
-            }}
             aria-label="Register for Genesis Tournament"
           >
             <Image
@@ -803,10 +786,9 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 4. Right Character: LEON (Chameleon Ninja Brawler) */}
+        {/* 4. Right Character: LEON (Chameleon Ninja Brawler - Subtle Idle Float, No Speech Bubble) */}
         <div 
-          onClick={handleLeonClick}
-          className="absolute z-26 cursor-pointer transition-transform duration-300 hover:scale-105 group gpu-accel"
+          className="absolute z-26 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
           style={{
             bottom: "20%",
             right: "12%",
@@ -814,7 +796,7 @@ export default function Home() {
             height: "auto",
             animation: "float-gentle 4s 1s ease-in-out infinite",
           }}
-          title="Click Leon for sneaky brawler moves!"
+          title="Leon Brawler"
         >
           <div className="relative">
             <Image
@@ -825,110 +807,103 @@ export default function Home() {
               className="w-full h-auto object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.75)] filter group-hover:brightness-110 transition-all"
               priority
             />
-            {/* Leon Dialogue Bubble */}
-            {leonQuote && (
-              <div className="absolute -top-14 left-1/2 -translate-x-1/2 px-4 py-2 rounded-2xl bg-white text-slate-900 font-extrabold text-sm whitespace-nowrap shadow-2xl border-2 border-slate-900 animate-fadeIn">
-                {leonQuote}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white" />
-              </div>
-            )}
           </div>
         </div>
 
-        {/* 5. Bottom Right: Squeak Balloon Character & Speech Bubble */}
+        {/* 5. Bottom Right: Squeak Balloon Character (Idle Float, Original Mascot Artwork, No Speech Popups) */}
         <div 
-          onClick={handleSqueakClick}
-          className={`absolute z-35 cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 group gpu-accel ${
-            squeakBounce ? "animate-bounce" : ""
-          }`}
+          className="absolute z-35 transition-transform duration-300 hover:scale-105 group gpu-accel cursor-default"
           style={{
             bottom: "1.5%",
             right: "1.5%",
             width: "clamp(260px, 25vw, 370px)",
             height: "auto",
-            animation: !squeakBounce ? "balloon-bob 4s ease-in-out infinite" : undefined,
+            animation: "balloon-bob 4s ease-in-out infinite",
           }}
-          title="Click Squeak for more brawler thoughts!"
+          title="Squeak Balloon Mascot"
         >
-          {squeakIndex === 0 ? (
-            /* Original Figma Asset with exact artwork & speech bubble */
-            <div className="relative">
-              <Image
-                src="/assets/group-1000012450.webp"
-                alt="Fine, you have my full attention."
-                width={370}
-                height={245}
-                className="w-full h-auto object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)]"
-                priority
-              />
-              <span className="absolute -bottom-1 right-8 text-[9px] text-cyan-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 px-2 py-0.5 rounded">
-                Click me! 💬
-              </span>
-            </div>
-          ) : (
-            /* Interactive Dynamic Dialogue State */
-            <div className="relative flex items-end justify-end gap-2">
-              <div className="relative max-w-[210px] p-3 rounded-2xl bg-white text-slate-950 font-black text-xs leading-snug shadow-2xl border-2 border-slate-900">
-                {SQUEAK_QUOTES[squeakIndex]}
-                {/* Pointer arrow to the right balloon */}
-                <div 
-                  className="absolute bottom-4 -right-2 w-0 h-0"
-                  style={{
-                    borderTop: "6px solid transparent",
-                    borderBottom: "6px solid transparent",
-                    borderLeft: "8px solid white",
-                  }}
-                />
-              </div>
+          <div className="relative">
+            <Image
+              src="/assets/group-1000012450.webp"
+              alt="Fine, you have my full attention."
+              width={370}
+              height={245}
+              className="w-full h-auto object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)]"
+              priority
+            />
+          </div>
+        </div>
 
-              {/* Just the Balloon Brawler Avatar */}
-              <div className="w-20 md:w-24 h-auto flex-shrink-0">
-                <Image
-                  src="/assets/group-1000012450.webp"
-                  alt="Squeak Balloon"
-                  width={150}
-                  height={150}
-                  style={{ width: "auto", height: "auto" }}
-                  className="w-full h-auto object-cover object-right"
-                />
-              </div>
-            </div>
-          )}
+        {/* Floating Scroll Cue to About Genesis */}
+        <div 
+          onClick={() => {
+            sounds.playHover();
+            document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-35 flex flex-col items-center cursor-pointer group pointer-events-auto"
+          title="Scroll down to About Genesis"
+        >
+          <div className="px-3.5 sm:px-5 py-1.5 rounded-full bg-blue-950/80 border-2 border-red-500 text-red-100 text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-[0_0_15px_rgba(220,38,38,0.5)] flex items-center gap-1.5 transition-all group-hover:scale-105 group-hover:bg-blue-900 group-hover:border-red-400">
+            <span className="animate-bounce">▼</span>
+            <span>ABOUT GENESIS</span>
+            <span className="animate-bounce">▼</span>
+          </div>
         </div>
 
       </div>
+    </section>
 
-      {/* ── MODALS & DRAWERS ───────────────────────────────── */}
-      <RegistrationModal 
-        isOpen={isRegisterOpen} 
-        onClose={() => setIsRegisterOpen(false)} 
-      />
+    {/* ── SECTION 2: ABOUT GENESIS (STATIC SECTION) ──────── */}
+    <AboutSection />
 
-      <BrochureModal 
-        isOpen={isBrochureOpen} 
-        onClose={() => setIsBrochureOpen(false)} 
-      />
+    {/* ── SECTION 3: TIMELINE (INTERACTIVE ROADMAP) ──────── */}
+    <TimelineSection />
 
-      <PrizeModal 
-        isOpen={isPrizeOpen} 
-        onClose={() => setIsPrizeOpen(false)} 
-      />
-
-      <SponsorsModal 
-        isOpen={isSponsorsOpen} 
-        onClose={() => setIsSponsorsOpen(false)} 
-      />
-
-      <MenuDrawer 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)}
-        isMuted={isMuted}
-        onToggleMute={toggleMute}
-        onOpenRegister={() => setIsRegisterOpen(true)}
-        onOpenBrochure={() => setIsBrochureOpen(true)}
-        onOpenPrize={() => setIsPrizeOpen(true)}
-        onOpenSponsors={() => setIsSponsorsOpen(true)}
-      />
-    </main>
+      {/* ── FULL-SCREEN VIEWPORT SIDE DOCK INDICATORS (3 SECTIONS) ──────── */}
+      <aside aria-label="Page Sections" className="fixed right-3 sm:right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3 pointer-events-auto">
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className={`w-3.5 h-3.5 rounded-full transition-all duration-300 border-2 cursor-pointer ${
+            activeSection === "hero"
+              ? "bg-amber-400 border-white scale-125 shadow-[0_0_12px_#fbbf24]"
+              : "bg-blue-950/80 border-blue-400/50 hover:bg-blue-700 hover:scale-110"
+          }`}
+          title="Genesis Main Stage"
+          aria-label="Genesis Main Stage"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className={`w-3.5 h-3.5 rounded-full transition-all duration-300 border-2 cursor-pointer ${
+            activeSection === "about"
+              ? "bg-red-500 border-white scale-125 shadow-[0_0_12px_#ef4444]"
+              : "bg-blue-950/80 border-blue-400/50 hover:bg-blue-700 hover:scale-110"
+          }`}
+          title="About Genesis"
+          aria-label="About Genesis"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playClick();
+            document.getElementById("timeline")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className={`w-3.5 h-3.5 rounded-full transition-all duration-300 border-2 cursor-pointer ${
+            activeSection === "timeline"
+              ? "bg-cyan-400 border-white scale-125 shadow-[0_0_12px_#22d3ee]"
+              : "bg-blue-950/80 border-blue-400/50 hover:bg-blue-700 hover:scale-110"
+          }`}
+          title="Genesis Event Timeline"
+          aria-label="Genesis Event Timeline"
+        />
+      </aside>
+    </div>
   );
 }
